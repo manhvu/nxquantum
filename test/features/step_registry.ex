@@ -13,7 +13,8 @@ defmodule NxQuantum.Features.StepRegistry do
     NxQuantum.Features.Steps.BatchedPqcSteps,
     NxQuantum.Features.Steps.ErrorMitigationSteps,
     NxQuantum.Features.Steps.TopologyTranspilationSteps,
-    NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps
+    NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps,
+    NxQuantum.Features.Steps.DynamicExecutionHardwareBridgesSteps
   ]
 
   @feature_to_module Map.new(@step_modules, &{&1.feature(), &1})
