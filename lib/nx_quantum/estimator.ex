@@ -35,4 +35,34 @@ defmodule NxQuantum.Estimator do
       Batch.run(circuit, normalized_specs, opts)
     end
   end
+
+  @spec batched_expectation((Nx.Tensor.t() -> Circuit.t()), Nx.Tensor.t(), keyword()) ::
+          {:ok, Nx.Tensor.t()} | {:error, map()}
+  def batched_expectation(circuit_builder, %Nx.Tensor{} = params_batch, opts \\ [])
+      when is_function(circuit_builder, 1) do
+    shape = Nx.shape(params_batch)
+
+    if tuple_size(shape) == 1 do
+      results =
+        params_batch
+        |> Nx.to_flat_list()
+        |> Enum.map(fn value ->
+          value
+          |> Nx.tensor()
+          |> circuit_builder.()
+          |> expectation_result(opts)
+        end)
+
+      case Enum.find(results, &match?({:error, _}, &1)) do
+        {:error, metadata} ->
+          {:error, metadata}
+
+        nil ->
+          values = results |> Enum.map(fn {:ok, tensor} -> Nx.to_number(tensor) end) |> Nx.tensor(type: {:f, 32})
+          {:ok, values}
+      end
+    else
+      {:error, %{code: :invalid_batch_shape, expected: {:batch}, received: shape}}
+    end
+  end
 end

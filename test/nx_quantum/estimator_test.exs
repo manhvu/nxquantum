@@ -84,4 +84,31 @@ defmodule NxQuantum.EstimatorTest do
                Estimator.run(circuit, observables: [:pauli_z], wire: -1)
     end
   end
+
+  describe "batched_expectation/3" do
+    test "returns deterministic batch values for fixed inputs" do
+      builder = fn theta ->
+        [qubits: 1]
+        |> Circuit.new()
+        |> Gates.ry(0, theta: theta)
+      end
+
+      batch = Nx.tensor([0.0, 1.0, 2.0])
+
+      assert {:ok, a} = Estimator.batched_expectation(builder, batch, observable: :pauli_z, wire: 0)
+      assert {:ok, b} = Estimator.batched_expectation(builder, batch, observable: :pauli_z, wire: 0)
+      assert Nx.to_flat_list(a) == Nx.to_flat_list(b)
+      assert Nx.shape(a) == {3}
+    end
+
+    test "returns typed error for invalid batch shape" do
+      builder = fn theta -> [qubits: 1] |> Circuit.new() |> Gates.ry(0, theta: theta) end
+
+      assert {:error, %{code: :invalid_batch_shape, received: {2, 2}}} =
+               Estimator.batched_expectation(builder, Nx.tensor([[0.1, 0.2], [0.3, 0.4]]),
+                 observable: :pauli_z,
+                 wire: 0
+               )
+    end
+  end
 end

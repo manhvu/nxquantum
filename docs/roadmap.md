@@ -68,9 +68,17 @@ Milestone D review gate (before Phase 5):
 
 ## Phase 5 - v0.3: Hardware-Ready Primitives and Batch Workflows
 
-- [ ] Ship stable `Estimator` and `Sampler` primitives with deterministic typed contracts.
-- [ ] Add batched PQC execution as a first-class API path.
-- [ ] Add pluggable mitigation pipeline (readout + ZNE baseline).
-- [ ] Add topology-aware transpilation interface with deterministic shortest-path routing.
-- [ ] Add dynamic-circuit IR foundation (validation + metadata) with explicit no-execution boundary.
-- [ ] Publish v0.3 spec and feature-to-step mappings.
+- [x] Ship stable `Estimator` and `Sampler` primitives with deterministic typed contracts.
+- [x] Add batched PQC execution as a first-class API path.
+- [x] Add pluggable mitigation pipeline (readout + ZNE baseline).
+- [x] Add topology-aware transpilation interface with deterministic shortest-path routing.
+- [x] Add dynamic-circuit IR foundation (validation + metadata) with explicit no-execution boundary.
+- [x] Publish v0.3 spec and feature-to-step mappings.
+
+Milestone E review gate (v0.3 foundation):
+
+1. Primitive facades (`Estimator`, `Sampler`) have deterministic typed contracts and API export guards.
+2. Batched estimator/sampler APIs are first-class and validated by executable feature and unit tests.
+3. Mitigation and transpilation facades are deterministic and feature-covered.
+4. Dynamic IR validation and explicit no-execution runtime boundary are implemented in `NxQuantum.DynamicIR`.
+5. v0.3 spec includes feature-to-step mapping and aligns with implemented foundation behavior.

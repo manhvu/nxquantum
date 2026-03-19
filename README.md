@@ -15,12 +15,11 @@ Core principles:
 
 ## Current Status
 
-This repository is currently in **active v0.2 delivery**:
+This repository is currently in **active v0.2/v0.3 foundation delivery**:
 
-- Milestone A (P0) correctness/runtime features are implemented and verified.
-- Milestone B (P1) differentiation/noise/optimization features are implemented and benchmarked.
-- Milestone C (P2) kernel API and advanced workflow examples are in progress.
-- v0.3 specification work is active for hardware-ready primitives.
+- v0.2 Milestones A-D are implemented (correctness, runtime, differentiation/noise/optimization, ecosystem readiness).
+- v0.3 foundation milestone is implemented (primitives, batch workflows, mitigation/transpilation interfaces, dynamic IR boundary).
+- v0.3 specification work continues for deeper hardware-ready execution paths.
 
 ## Quickstart
 

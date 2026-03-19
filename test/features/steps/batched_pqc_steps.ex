@@ -7,10 +7,10 @@ defmodule NxQuantum.Features.Steps.BatchedPqcSteps do
   import ExUnit.Assertions
 
   alias NxQuantum.Circuit
+  alias NxQuantum.Estimator
   alias NxQuantum.Features.StepExecutor
   alias NxQuantum.Gates
   alias NxQuantum.Sampler
-  alias NxQuantum.TestSupport.Fixtures
   alias NxQuantum.TestSupport.Helpers
 
   @impl true
@@ -29,7 +29,13 @@ defmodule NxQuantum.Features.Steps.BatchedPqcSteps do
   defp handle_setup(%{text: text}, ctx) do
     cond do
       text == "a fixed variational circuit topology" ->
-        {:handled, Map.put(ctx, :circuit_builder, fn theta -> Fixtures.expectation_for_theta(theta) end)}
+        builder = fn theta ->
+          [qubits: 1]
+          |> Circuit.new()
+          |> Gates.ry(0, theta: theta)
+        end
+
+        {:handled, Map.put(ctx, :circuit_builder, builder)}
 
       text == "batched parameters are provided as an Nx tensor" ->
         {:handled, Map.put(ctx, :batched_theta, Nx.tensor([0.0, 1.2, 2.1]))}
@@ -55,37 +61,70 @@ defmodule NxQuantum.Features.Steps.BatchedPqcSteps do
   defp handle_execution(%{text: text}, ctx) do
     cond do
       text == "I compute expectations in batched mode" ->
-        values = ctx.batched_theta |> Nx.to_flat_list() |> Enum.map(&ctx.circuit_builder.(&1))
-        {:handled, Map.put(ctx, :batched_values, values)}
+        {:ok, values} =
+          Estimator.batched_expectation(
+            fn theta -> ctx.circuit_builder.(theta) end,
+            ctx.batched_theta,
+            observable: :pauli_z,
+            wire: 0
+          )
+
+        {:handled, Map.put(ctx, :batched_values, Nx.to_flat_list(values))}
 
       text == "I compute the same expectations using a scalar loop baseline" ->
-        baseline = ctx.batched_theta |> Nx.to_flat_list() |> Enum.map(&ctx.circuit_builder.(&1))
+        baseline =
+          ctx.batched_theta
+          |> Nx.to_flat_list()
+          |> Enum.map(fn theta ->
+            theta
+            |> Nx.tensor()
+            |> ctx.circuit_builder.()
+            |> Circuit.expectation(observable: :pauli_z, wire: 0)
+            |> Nx.to_number()
+          end)
+
         {:handled, Map.put(ctx, :baseline_values, baseline)}
 
       text == "I run batched execution" ->
-        values = ctx.batched_theta |> Nx.to_flat_list() |> Enum.map(&ctx.circuit_builder.(&1))
-        {:handled, Map.put(ctx, :batched_values, values)}
+        {:ok, values} =
+          Estimator.batched_expectation(
+            fn theta -> ctx.circuit_builder.(theta) end,
+            ctx.batched_theta,
+            observable: :pauli_z,
+            wire: 0
+          )
+
+        {:handled, Map.put(ctx, :batched_values, Nx.to_flat_list(values))}
 
       text == "I run batched Sampler twice" ->
-        thetas = Nx.to_flat_list(ctx.batched_theta)
+        {:ok, sample_a} =
+          Sampler.batched_run(
+            fn theta -> ctx.circuit_builder.(theta) end,
+            ctx.batched_theta,
+            shots: ctx.shots,
+            seed: ctx.seed
+          )
 
-        run = fn ->
-          Enum.map(thetas, fn theta ->
-            c = [qubits: 1] |> Circuit.new() |> Gates.ry(0, theta: theta)
-            {:ok, s} = Sampler.run(c, shots: ctx.shots, seed: ctx.seed)
-            s.counts
-          end)
-        end
+        {:ok, sample_b} =
+          Sampler.batched_run(
+            fn theta -> ctx.circuit_builder.(theta) end,
+            ctx.batched_theta,
+            shots: ctx.shots,
+            seed: ctx.seed
+          )
 
-        {:handled, ctx |> Map.put(:sample_a, run.()) |> Map.put(:sample_b, run.())}
+        counts_a = Enum.map(sample_a, & &1.counts)
+        counts_b = Enum.map(sample_b, & &1.counts)
+        {:handled, ctx |> Map.put(:sample_a, counts_a) |> Map.put(:sample_b, counts_b)}
 
       text == "I run batched Estimator" ->
-        shape = Nx.shape(ctx.invalid_batch)
-
         error =
-          if tuple_size(shape) == 1,
-            do: {:ok, :noop},
-            else: {:error, %{code: :invalid_batch_shape, expected: {3}, received: shape}}
+          Estimator.batched_expectation(
+            fn theta -> ctx.circuit_builder.(theta) end,
+            ctx.invalid_batch,
+            observable: :pauli_z,
+            wire: 0
+          )
 
         {:handled, Map.put(ctx, :error_result, error)}
 
@@ -105,7 +144,15 @@ defmodule NxQuantum.Features.Steps.BatchedPqcSteps do
 
       text == "output values match scalar API values" ->
         [theta] = Nx.to_flat_list(ctx.batched_theta)
-        assert_in_delta hd(ctx.batched_values), ctx.circuit_builder.(theta), 1.0e-6
+
+        scalar =
+          theta
+          |> Nx.tensor()
+          |> ctx.circuit_builder.()
+          |> Circuit.expectation(observable: :pauli_z, wire: 0)
+          |> Nx.to_number()
+
+        assert_in_delta hd(ctx.batched_values), scalar, 1.0e-6
         {:handled, ctx}
 
       text == "output shape follows the batch contract" ->

@@ -51,6 +51,7 @@ Behavior ownership is defined by executable features, not by file location alone
 - `NxQuantum.Sampler`: shot-based sampling primitive boundary.
 - `NxQuantum.Mitigation`: composable error-mitigation pipeline facade.
 - `NxQuantum.Transpiler`: topology-aware transpilation facade.
+- `NxQuantum.DynamicIR`: dynamic-circuit IR validation and explicit execution-boundary facade.
 - `NxQuantum.Grad`: differentiation mode facade.
 - `NxQuantum.Compiler`: deterministic circuit optimization pass entrypoint.
 - `NxQuantum.Kernels`: quantum kernel matrix entrypoint.

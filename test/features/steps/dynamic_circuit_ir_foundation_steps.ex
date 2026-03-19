@@ -6,8 +6,8 @@ defmodule NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps do
 
   import ExUnit.Assertions
 
+  alias NxQuantum.DynamicIR
   alias NxQuantum.Features.StepExecutor
-  alias NxQuantum.TestSupport.Fixtures
   alias NxQuantum.TestSupport.Helpers
 
   @impl true
@@ -59,10 +59,10 @@ defmodule NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps do
   defp handle_execution(%{text: text}, ctx) do
     cond do
       text == "I validate dynamic IR" ->
-        {:handled, Map.put(ctx, :validation, Fixtures.validate_dynamic_ir(ctx.ir))}
+        {:handled, Map.put(ctx, :validation, DynamicIR.validate(ctx.ir))}
 
       text == "I request runtime execution" ->
-        execution = {:error, %{code: :dynamic_execution_not_supported, message: "planned for a future release"}}
+        execution = DynamicIR.execute(ctx.ir)
         {:handled, Map.put(ctx, :execution, execution)}
 
       true ->
@@ -91,12 +91,12 @@ defmodule NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps do
 
       text == "error \"invalid_dynamic_ir\" is returned" ->
         assert {:error, %{code: :invalid_dynamic_ir}} =
-                 ctx.validation || Fixtures.validate_dynamic_ir(ctx.ir)
+                 ctx.validation || DynamicIR.validate(ctx.ir)
 
         {:handled, ctx}
 
       text == "error metadata includes missing register identifier" ->
-        assert {:error, %{register: _}} = ctx.validation || Fixtures.validate_dynamic_ir(ctx.ir)
+        assert {:error, %{register: _}} = ctx.validation || DynamicIR.validate(ctx.ir)
         {:handled, ctx}
 
       text == "error \"dynamic_execution_not_supported\" is returned" ->
