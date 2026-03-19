@@ -13,3 +13,15 @@ NXQ_ENABLE_EXLA=0 NXQ_ENABLE_TORCHX=0 mise exec -- mix run bench/milestone_b.exs
 Baseline report:
 
 - `bench/milestone_b_baseline.md`
+
+## Milestone G (v0.4 P1)
+
+Run:
+
+```bash
+NXQ_ENABLE_EXLA=0 NXQ_ENABLE_TORCHX=0 mise exec -- mix run bench/milestone_g.exs
+```
+
+Baseline report:
+
+- `bench/milestone_g_baseline.md`

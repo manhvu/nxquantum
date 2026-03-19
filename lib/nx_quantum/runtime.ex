@@ -9,11 +9,13 @@ defmodule NxQuantum.Runtime do
   alias NxQuantum.Runtime.Catalog
   alias NxQuantum.Runtime.Detection
   alias NxQuantum.Runtime.Fallback
+  alias NxQuantum.Runtime.Scale
 
   @type profile_id ::
           :cpu_portable | :cpu_compiled | :nvidia_gpu_compiled | :torch_interop_runtime
   @type support_tier :: :p0 | :p1
   @type fallback_policy :: :strict | :allow_cpu_compiled
+  @type scale_strategy :: Scale.strategy()
 
   @type profile :: %{
           id: profile_id(),
@@ -69,5 +71,11 @@ defmodule NxQuantum.Runtime do
       {:ok, profile} ->
         Fallback.resolve(profile, runtime_available?, fallback_policy)
     end
+  end
+
+  @spec select_simulation_strategy(scale_strategy(), non_neg_integer(), keyword()) ::
+          {:ok, NxQuantum.Runtime.Scale.Decision.t()} | {:error, map()}
+  def select_simulation_strategy(strategy, qubit_count, opts \\ []) do
+    Scale.select(strategy, qubit_count, opts)
   end
 end

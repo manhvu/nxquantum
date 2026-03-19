@@ -36,7 +36,7 @@ defmodule NxQuantum.Mitigation.CalibrationPayload do
 
   defp invalid_payload_error(attrs) do
     attrs
-    |> Enum.into(%{})
+    |> Map.new()
     |> Map.put(:code, :invalid_calibration_payload)
   end
 end

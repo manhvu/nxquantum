@@ -85,17 +85,15 @@ Milestone E review gate (v0.3 foundation):
 
 ## Known Gaps (Post-v0.3 Foundation)
 
-1. Dynamic-circuit execution is still boundary-only (validation exists, execution engine is pending).
-2. Hardware-provider depth is still early (job lifecycle/calibration/provider-specific contracts need expansion).
-3. Large-scale simulation strategies (for example tensor-network/MPS) are still pending.
-4. Product-positioning assets versus Python-first alternatives need stronger public packaging (migration guides, side-by-side comparisons, case studies).
+1. Hardware-provider depth is still early (job lifecycle/calibration/provider-specific contracts need expansion).
+2. Product-positioning assets versus Python-first alternatives need stronger public packaging (migration guides, side-by-side comparisons, case studies).
 
 ## Phase 6 - v0.4 P0: Dynamic Execution + Hardware Bridges
 
-- [ ] Implement dynamic-circuit runtime execution for supported IR nodes (mid-circuit measurement + feed-forward branches).
-- [ ] Add provider-facing job lifecycle contracts (`submit`, `poll`, `cancel`, typed result retrieval).
-- [ ] Add first provider bridge adapter behind ports with deterministic typed error mapping.
-- [ ] Extend mitigation hooks to accept hardware calibration payload contracts.
+- [x] Implement dynamic-circuit runtime execution for supported IR nodes (mid-circuit measurement + feed-forward branches).
+- [x] Add provider-facing job lifecycle contracts (`submit`, `poll`, `cancel`, typed result retrieval).
+- [x] Add first provider bridge adapter behind ports with deterministic typed error mapping.
+- [x] Extend mitigation hooks to accept hardware calibration payload contracts.
 
 Milestone F review gate (before Phase 7):
 
@@ -105,10 +103,10 @@ Milestone F review gate (before Phase 7):
 
 ## Phase 7 - v0.4 P1: Scale and Performance
 
-- [ ] Add large-scale simulator fallback path (tensor-network/MPS-oriented strategy).
-- [ ] Improve batched execution path for `batch >= 32` with deterministic shape/performance contracts.
-- [ ] Publish cross-profile benchmark matrix (latency, throughput, memory) with reproducible scripts.
-- [ ] Add regression thresholds for performance-sensitive paths in CI reporting.
+- [x] Add large-scale simulator fallback path (tensor-network/MPS-oriented strategy).
+- [x] Improve batched execution path for `batch >= 32` with deterministic shape/performance contracts.
+- [x] Publish cross-profile benchmark matrix (latency, throughput, memory) with reproducible scripts.
+- [x] Add regression thresholds for performance-sensitive paths in CI reporting.
 
 Milestone G review gate (before Phase 8):
 

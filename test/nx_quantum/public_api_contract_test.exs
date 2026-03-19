@@ -7,6 +7,7 @@ defmodule NxQuantum.PublicApiContractTest do
   alias NxQuantum.Gates
   alias NxQuantum.Kernels
   alias NxQuantum.Mitigation
+  alias NxQuantum.Performance
   alias NxQuantum.Runtime
   alias NxQuantum.Sampler
   alias NxQuantum.Transpiler
@@ -27,6 +28,7 @@ defmodule NxQuantum.PublicApiContractTest do
       assert_exported(Runtime, :profile!, 1)
       assert_exported(Runtime, :resolve, 2)
       assert_exported(Runtime, :capabilities, 1)
+      assert_exported(Runtime, :select_simulation_strategy, 3)
 
       assert_exported(Estimator, :expectation, 2)
       assert_exported(Estimator, :expectation_result, 2)
@@ -47,6 +49,9 @@ defmodule NxQuantum.PublicApiContractTest do
       assert_exported(Transpiler, :run, 2)
       assert_exported(DynamicIR, :validate, 1)
       assert_exported(DynamicIR, :execute, 2)
+      assert_exported(Performance, :compare_batched_workflows, 3)
+      assert_exported(Performance, :benchmark_matrix, 2)
+      assert_exported(Performance, :evaluate_gates, 2)
     end
   end
 
