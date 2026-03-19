@@ -2,7 +2,7 @@ defmodule NxQuantum.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @source_url "https://github.com/your-org/nx_quantum"
+  @source_url "https://github.com/diogenes/nxquantum"
 
   def project do
     [
@@ -13,7 +13,9 @@ defmodule NxQuantum.MixProject do
       deps: deps(),
       aliases: aliases(),
       docs: docs(),
-      dialyzer: dialyzer()
+      dialyzer: dialyzer(),
+      description: description(),
+      package: package()
     ]
   end
 
@@ -106,6 +108,7 @@ defmodule NxQuantum.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
+      homepage_url: "https://hexdocs.pm/nx_quantum",
       extras: [
         "README.md",
         "CONTRIBUTING.md",
@@ -122,6 +125,22 @@ defmodule NxQuantum.MixProject do
         "AGENTS.md",
         "SKILLS.md"
       ]
+    ]
+  end
+
+  defp description do
+    "Pure-Elixir quantum circuit simulation and quantum machine learning primitives powered by Nx."
+  end
+
+  defp package do
+    [
+      name: "nx_quantum",
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => @source_url,
+        "Docs" => "https://hexdocs.pm/nx_quantum"
+      }
     ]
   end
 

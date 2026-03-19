@@ -5,5 +5,5 @@
 /.elixir_ls
 /.fetch
 *.ez
+/*.tar
 erl_crash.dump
-

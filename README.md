@@ -34,6 +34,39 @@ mix test.features
 mix quality
 ```
 
+## Publish to Hex
+
+1. Authenticate once (or refresh your key):
+
+```bash
+mix hex.user auth
+```
+
+2. Run release checks:
+
+```bash
+mix ci
+mix hex.build
+```
+
+3. Publish the package:
+
+```bash
+mix hex.publish
+```
+
+4. Publish docs to HexDocs:
+
+```bash
+mix hex.publish docs
+```
+
+Optional dry-run before publishing:
+
+```bash
+mix hex.publish --dry-run
+```
+
 ## Mix vs Mise
 
 - `mix` is the source of truth for project tasks and dependencies.
