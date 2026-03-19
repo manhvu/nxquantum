@@ -3,6 +3,12 @@
 NxQuantum is a pure-Elixir quantum ML library for the `Nx` ecosystem.
 It is built for ML engineers and researchers who want quantum primitives inside the same BEAM stack used for training loops, inference services, and production pipelines.
 
+## Who It Is For
+
+- Teams building ML systems in Elixir/Nx that need deterministic quantum primitives in the same runtime.
+- Researchers who want reproducible, typed contracts and BEAM-native integration patterns.
+- Not a primary fit (today) for teams whose top requirement is immediate broad hardware-provider coverage.
+
 ## Why It Matters
 
 Quantum tooling is mostly Python-first today. NxQuantum focuses on the Elixir/Nx community by providing:
@@ -14,6 +20,13 @@ Quantum tooling is mostly Python-first today. NxQuantum focuses on the Elixir/Nx
 See positioning and comparison details:
 
 - [docs/product-positioning.md](docs/product-positioning.md)
+
+## Choose Your Path
+
+- Evaluate vs Python-first workflows: [docs/python-comparison-workflows.md](docs/python-comparison-workflows.md)
+- Plan migration from Python workflows: [docs/migration-python-playbook.md](docs/migration-python-playbook.md)
+- Start interactive tutorials: [docs/livebook-tutorials.md](docs/livebook-tutorials.md)
+- Review benchmark narrative evidence: [docs/case-study-beam-integration.md](docs/case-study-beam-integration.md)
 
 ## Quick Start
 
@@ -40,9 +53,9 @@ For full setup and API walkthroughs and usage examples:
 
 ## What Is Still Planned
 
-- Full dynamic-circuit execution engine (validation boundary exists, execution is future work).
 - Deeper hardware-provider integrations and calibration workflows.
-- Larger-scale simulator strategies (for example tensor-network/MPS paths).
+- Broader provider-specific execution flows and production adapters.
+- More benchmark-backed case studies across real BEAM deployment patterns.
 
 Track status here:
 
@@ -54,6 +67,11 @@ Track status here:
 
 - [docs/getting-started.md](docs/getting-started.md)
 - [docs/product-positioning.md](docs/product-positioning.md)
+- [docs/python-comparison-workflows.md](docs/python-comparison-workflows.md)
+- [docs/migration-python-playbook.md](docs/migration-python-playbook.md)
+- [docs/decision-matrix.md](docs/decision-matrix.md)
+- [docs/livebook-tutorials.md](docs/livebook-tutorials.md)
+- [docs/case-study-beam-integration.md](docs/case-study-beam-integration.md)
 - [docs/axon-integration.md](docs/axon-integration.md)
 - [docs/model-recipes.md](docs/model-recipes.md)
 - [docs/backend-support.md](docs/backend-support.md)

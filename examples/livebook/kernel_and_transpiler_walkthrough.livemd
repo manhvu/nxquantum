@@ -1,0 +1,37 @@
+# Kernel + Transpiler Walkthrough
+
+```elixir
+Mix.install([
+  {:nx_quantum, path: "../.."}
+])
+```
+
+## Kernel Matrix Example
+
+```elixir
+x =
+  Nx.tensor([
+    [0.0, 0.1],
+    [0.2, 0.3],
+    [0.4, 0.5]
+  ])
+
+NxQuantum.Kernels.matrix(x, gamma: 0.7, seed: 1234)
+```
+
+## Topology-Aware Transpilation
+
+```elixir
+alias NxQuantum.Circuit
+alias NxQuantum.Gates
+
+circuit =
+  Circuit.new(qubits: 4)
+  |> Gates.cnot(control: 0, target: 3)
+
+NxQuantum.Transpiler.run(
+  circuit,
+  topology: {:coupling_map, [{0, 1}, {1, 2}, {2, 3}]},
+  mode: :insert_swaps
+)
+```

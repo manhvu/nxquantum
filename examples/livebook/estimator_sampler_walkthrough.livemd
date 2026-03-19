@@ -1,0 +1,32 @@
+# Estimator + Sampler Walkthrough
+
+```elixir
+Mix.install([
+  {:nx_quantum, path: "../.."}
+])
+```
+
+## Build a Circuit
+
+```elixir
+alias NxQuantum.Circuit
+alias NxQuantum.Gates
+
+circuit =
+  Circuit.new(qubits: 1)
+  |> Gates.ry(0, theta: Nx.tensor(0.8))
+```
+
+## Deterministic Expectation
+
+```elixir
+{:ok, exp} = NxQuantum.Estimator.expectation_result(circuit, observable: :pauli_z, wire: 0)
+exp
+```
+
+## Seeded Sampling
+
+```elixir
+{:ok, sample} = NxQuantum.Sampler.run(circuit, shots: 512, seed: 2026)
+sample
+```

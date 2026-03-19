@@ -86,7 +86,6 @@ Milestone E review gate (v0.3 foundation):
 ## Known Gaps (Post-v0.3 Foundation)
 
 1. Hardware-provider depth is still early (job lifecycle/calibration/provider-specific contracts need expansion).
-2. Product-positioning assets versus Python-first alternatives need stronger public packaging (migration guides, side-by-side comparisons, case studies).
 
 ## Phase 6 - v0.4 P0: Dynamic Execution + Hardware Bridges
 
@@ -116,11 +115,11 @@ Milestone G review gate (before Phase 8):
 
 ## Phase 8 - v0.4 P2: Product Positioning vs Python-First Alternatives
 
-- [ ] Publish side-by-side workflow docs for identical tasks (estimation, sampling, kernels, transpilation) vs Python-first stacks.
-- [ ] Add migration playbooks from common Python quantum workflows into Elixir/NxQuantum patterns.
-- [ ] Provide Livebook-first tutorials and runnable end-to-end recipe packs for ML teams.
-- [ ] Publish a clear decision matrix: when NxQuantum is the better fit and when Python-first tooling is still preferable.
-- [ ] Add at least one public case-study style benchmark narrative focused on BEAM integration value.
+- [x] Publish side-by-side workflow docs for identical tasks (estimation, sampling, kernels, transpilation) vs Python-first stacks.
+- [x] Add migration playbooks from common Python quantum workflows into Elixir/NxQuantum patterns.
+- [x] Provide Livebook-first tutorials and runnable end-to-end recipe packs for ML teams.
+- [x] Publish a clear decision matrix: when NxQuantum is the better fit and when Python-first tooling is still preferable.
+- [x] Add at least one public case-study style benchmark narrative focused on BEAM integration value.
 
 Milestone H review gate (positioning readiness):
 

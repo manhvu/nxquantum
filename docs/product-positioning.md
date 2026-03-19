@@ -27,13 +27,25 @@ It is most valuable when you care about:
 | Service integration in BEAM apps | Native fit | Cross-language integration required |
 | Hardware-provider depth today | Early foundation, expanding | Typically broader at present |
 
+## Positioning Assets
+
+1. Side-by-side workflows:
+   - [docs/python-comparison-workflows.md](python-comparison-workflows.md)
+2. Migration playbook:
+   - [docs/migration-python-playbook.md](migration-python-playbook.md)
+3. Decision matrix:
+   - [docs/decision-matrix.md](decision-matrix.md)
+4. Livebook tutorials:
+   - [docs/livebook-tutorials.md](livebook-tutorials.md)
+5. Case-study benchmark narrative:
+   - [docs/case-study-beam-integration.md](case-study-beam-integration.md)
+
 ## Important Gaps (Planned)
 
 NxQuantum is intentionally honest about current limits:
 
-1. Full dynamic-circuit execution engine is not yet implemented (validation + explicit boundary is implemented).
-2. Hardware-provider integrations and calibration depth are still growing.
-3. Large-scale simulator alternatives (for example tensor-network/MPS paths) are still planned.
+1. Hardware-provider integrations and calibration depth are still growing.
+2. Some advanced provider-specific execution flows remain phased.
 
 References:
 
