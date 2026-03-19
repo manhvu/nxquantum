@@ -15,13 +15,12 @@ Core principles:
 
 ## Current Status
 
-This repository is currently in **planning + skeleton phase**:
+This repository is currently in **active v0.2 delivery**:
 
-- Architecture and domain boundaries are defined.
-- Public API shape is scaffolded.
-- Feature specs and executable feature-test scaffolding are in place.
-- Core simulator implementation is intentionally minimal.
-- v0.3 specification work is active, with deterministic topology-routing scenarios prioritized.
+- Milestone A (P0) correctness/runtime features are implemented and verified.
+- Milestone B (P1) differentiation/noise/optimization features are implemented and benchmarked.
+- Milestone C (P2) kernel API and advanced workflow examples are in progress.
+- v0.3 specification work is active for hardware-ready primitives.
 
 ## Quickstart
 
@@ -139,6 +138,8 @@ See [docs/architecture.md](docs/architecture.md) for details.
 - [docs/v0.2-feature-spec.md](docs/v0.2-feature-spec.md)
 - [docs/v0.2-improvement-plan.md](docs/v0.2-improvement-plan.md)
 - [docs/v0.3-feature-spec.md](docs/v0.3-feature-spec.md)
+- [docs/axon-integration.md](docs/axon-integration.md)
+- [docs/model-recipes.md](docs/model-recipes.md)
 - [docs/testing-strategy.md](docs/testing-strategy.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [AGENTS.md](AGENTS.md)

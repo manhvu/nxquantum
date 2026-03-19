@@ -69,6 +69,12 @@ defmodule NxQuantum.Features.Steps.QuantumKernelMethodsSteps do
         assert Nx.to_flat_list(ctx.k) == Nx.to_flat_list(k2)
         {:handled, ctx}
 
+      text =~ ~r/^changing seed to / ->
+        changed_seed = trunc(Helpers.parse_quoted_number(text))
+        k2 = Kernels.matrix(ctx.x, gamma: 0.7, seed: changed_seed)
+        refute Nx.to_flat_list(ctx.k) == Nx.to_flat_list(k2)
+        {:handled, ctx}
+
       text =~ ~r/^minimum eigenvalue of K is greater than or equal to / ->
         threshold = Helpers.parse_quoted_number(text)
         assert Fixtures.psd_by_quadratic_form?(ctx.k, abs(threshold))

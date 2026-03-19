@@ -42,9 +42,16 @@ Milestone B review gate (before Phase 3):
 
 ## Phase 3 - v0.2 P2: Advanced ML Workflows
 
-- [ ] Quantum kernel matrix generation API.
-- [ ] Axon layer integration polish and end-to-end examples.
-- [ ] Additional model recipes and tutorials.
+- [x] Quantum kernel matrix generation API.
+- [x] Axon layer integration polish and end-to-end examples.
+- [x] Additional model recipes and tutorials.
+
+Milestone C review gate (before Phase 4):
+
+1. `NxQuantum.Kernels.matrix/2` provides deterministic, seed-aware kernel matrix generation.
+2. Kernel matrix workflows are validated by executable feature and unit coverage (shape, symmetry, PSD/reproducibility).
+3. Axon integration workflow is documented with end-to-end runnable examples.
+4. Additional model recipes/tutorial docs are published and linked from the README.
 
 ## Phase 4 - Ecosystem Readiness
 
