@@ -65,7 +65,7 @@ Shared test utilities live under `test/support/test_support/` with `NxQuantum.Te
 - Formatting: `mix format` (Styler plugin configured in `.formatter.exs`).
 - Linting: `mix credo --strict`.
 - Type checking: `mix dialyzer`.
-- Performance baseline: `benchee` scripts under `bench/` (to be added as kernels land).
+- Performance baseline: `benchee` scripts under `bench/` (`bench/milestone_b.exs` currently).
 
 ## 5.1) Topology Routing Contribution Pattern (v0.3 Step 1)
 

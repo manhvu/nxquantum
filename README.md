@@ -140,6 +140,8 @@ See [docs/architecture.md](docs/architecture.md) for details.
 - [docs/v0.3-feature-spec.md](docs/v0.3-feature-spec.md)
 - [docs/axon-integration.md](docs/axon-integration.md)
 - [docs/model-recipes.md](docs/model-recipes.md)
+- [docs/api-stability.md](docs/api-stability.md)
+- [docs/release-process.md](docs/release-process.md)
 - [docs/testing-strategy.md](docs/testing-strategy.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [AGENTS.md](AGENTS.md)

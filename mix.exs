@@ -120,6 +120,8 @@ defmodule NxQuantum.MixProject do
         "docs/v0.3-feature-spec.md",
         "docs/axon-integration.md",
         "docs/model-recipes.md",
+        "docs/api-stability.md",
+        "docs/release-process.md",
         "docs/architecture.md",
         "docs/testing-strategy.md",
         "docs/roadmap.md",

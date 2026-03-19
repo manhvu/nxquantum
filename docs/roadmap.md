@@ -55,9 +55,16 @@ Milestone C review gate (before Phase 4):
 
 ## Phase 4 - Ecosystem Readiness
 
-- [ ] API stabilization.
-- [ ] HexDocs polish.
-- [ ] CI/CD and release automation.
+- [x] API stabilization.
+- [x] HexDocs polish.
+- [x] CI/CD and release automation.
+
+Milestone D review gate (before Phase 5):
+
+1. Public stable/experimental API contract is documented and guarded by executable contract tests.
+2. HexDocs navigation includes advanced integration/recipe/release guidance.
+3. CI validates core quality gates and backend smoke lanes with deterministic environment toggles.
+4. Release automation workflow builds package/docs artifacts on tags/manual dispatch.
 
 ## Phase 5 - v0.3: Hardware-Ready Primitives and Batch Workflows
 
