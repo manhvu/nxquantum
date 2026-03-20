@@ -77,6 +77,9 @@ Track status here:
 - [docs/backend-support.md](docs/backend-support.md)
 - [docs/api-stability.md](docs/api-stability.md)
 - [docs/architecture.md](docs/architecture.md)
+- [docs/observability.md](docs/observability.md)
+- [docs/v0.5-feature-spec.md](docs/v0.5-feature-spec.md)
+- [docs/v0.5-provider-implementation-plan.md](docs/v0.5-provider-implementation-plan.md)
 
 ## Contributing
 

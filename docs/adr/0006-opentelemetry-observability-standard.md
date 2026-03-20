@@ -151,5 +151,6 @@ Negative:
    - granular profile emits lifecycle breakdown,
    - forensics profile emits deep diagnostic events with explicit opt-in.
 2. Add provider instrumentation contract tests for all top-3 adapters.
-3. Publish observability guide with semantic conventions and dashboard examples.
+3. Publish observability guide with semantic conventions and dashboard examples:
+   - `docs/observability.md`
 4. Add CI checks for telemetry schema stability and redaction behavior.

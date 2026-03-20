@@ -182,6 +182,7 @@ Milestone J review gate (before Phase 11):
 - [ ] Publish benchmark matrix with reproducible scripts and explicit provider caveats.
 - [ ] Add support-tier policy (`stable`, `beta`, `experimental`) and release-note templates per provider adapter.
 - [ ] Publish observability conventions guide and starter dashboards for top-3 provider workflows.
+  - `docs/observability.md`
 - [ ] Complete release-quality gates for v0.5 provider support path.
 
 Milestone K review gate (v0.5 readiness):

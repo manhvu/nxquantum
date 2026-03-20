@@ -116,3 +116,13 @@ To keep Cucumber extension step discovery aligned with Elixir step modules:
 2. Ensure `.vscode/settings.json` points:
    - `cucumber.features` to `features/**/*.feature`
    - `cucumber.glue` to `.vscode/cucumber-glue/**/*.js` and `test/features/steps/**/*.ex`
+
+## 8) Observability Contribution Path (v0.5+)
+
+When adding provider or workflow instrumentation:
+
+1. Read `docs/observability.md` and `docs/adr/0006-opentelemetry-observability-standard.md` first.
+2. Add/update observability scenarios in `features/provider_observability.feature`.
+3. Add/update step mappings under `test/features/steps/provider_observability_steps.ex`.
+4. Add schema tests for span names/attributes, metric contracts, and log redaction behavior.
+5. Validate profile behavior (`high_level`, `granular`, `forensics`) with deterministic fixtures.
