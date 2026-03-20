@@ -126,3 +126,68 @@ Milestone H review gate (positioning readiness):
 1. Positioning docs make differentiators explicit without hiding current limitations.
 2. Migration guides and side-by-side examples are runnable and verified.
 3. Public narrative is backed by reproducible data (benchmarks and workflow evidence), not only claims.
+
+## Known Gaps (Post-v0.4 Positioning)
+
+1. Top-3 provider production adapters are not yet implemented end-to-end (`IBM Runtime`, `AWS Braket`, `Azure Quantum`).
+2. Provider-specific lifecycle differences (state models, cancellation semantics, calibration/result payloads) are not yet normalized in a public contract.
+3. Migration assets still require provider-specific implementation guidance and executable acceptance mapping.
+
+## Phase 9 - v0.5 P0: Production Provider Bridges (IBM Runtime + AWS Braket)
+
+- [ ] Finalize provider capability contract (`supports_estimator`, `supports_sampler`, `supports_dynamic`, `supports_cancel_in_running`, `supports_calibration_payload`).
+- [ ] Implement `NxQuantum.Adapters.Providers.IBMRuntime` behind `NxQuantum.Ports.Provider` with typed lifecycle/error mapping.
+- [ ] Implement `NxQuantum.Adapters.Providers.AwsBraket` behind `NxQuantum.Ports.Provider` with typed lifecycle/error mapping.
+- [ ] Add provider credential/config envelope with deterministic redaction and typed configuration diagnostics.
+- [ ] Add deterministic fixture-backed contract tests for IBM Runtime and AWS Braket lifecycle transitions.
+- [ ] Publish v0.5 specification and provider implementation playbook:
+  - `docs/v0.5-feature-spec.md`
+  - `docs/v0.5-provider-implementation-plan.md`
+- [ ] Add provider architecture ADR set:
+  - `docs/adr/0002-provider-capability-contract-v1.md`
+  - `docs/adr/0003-ibm-runtime-provider-adapter.md`
+  - `docs/adr/0004-aws-braket-provider-adapter.md`
+  - `docs/adr/0005-azure-quantum-provider-adapter.md`
+  - `docs/adr/0006-opentelemetry-observability-standard.md`
+
+Milestone I review gate (before Phase 10):
+
+1. IBM Runtime and AWS Braket adapters execute `submit`, `poll`, `cancel`, and `fetch_result` through `NxQuantum.ProviderBridge`.
+2. Provider-specific statuses/errors are mapped into stable typed NxQuantum contracts.
+3. Unsupported capability requests fail fast with typed diagnostics (no silent fallback across providers).
+4. Feature/contract tests are reproducible via deterministic fixtures and CI smoke lanes.
+
+## Phase 10 - v0.5 P1: Azure Quantum + Cross-Provider Normalization
+
+- [ ] Implement `NxQuantum.Adapters.Providers.AzureQuantum` behind `NxQuantum.Ports.Provider`.
+- [ ] Normalize target-selection and capability-discovery contract across IBM/AWS/Azure.
+- [ ] Add provider-specific cancellation/terminal-state policy handling with explicit metadata.
+- [ ] Normalize calibration/result payload ingestion envelopes across top-3 providers.
+- [ ] Add cross-provider contract scenarios for typed lifecycle equivalence and portability boundaries.
+- [ ] Implement OpenTelemetry observability profile support (`high_level`, `granular`, `forensics`) for provider lifecycle traces, logs, and metrics.
+- [ ] Add deterministic experiment fingerprint and portability-delta telemetry contracts for cross-provider comparability.
+
+Milestone J review gate (before Phase 11):
+
+1. Azure Quantum lifecycle behavior is integrated with typed provider-specific caveat metadata.
+2. Capability discovery contract is stable and documented across all top-3 providers.
+3. Cross-provider scenario suite validates deterministic typed behavior for equivalent workflows.
+4. CI includes provider smoke lanes and deterministic fixture lanes for all top-3 adapters.
+5. OpenTelemetry schema/contracts are stable and profile-driven observability behavior is acceptance-covered.
+
+## Phase 11 - v0.5 P2: Migration Packs, Adoption Assets, and Release Hardening
+
+- [ ] Publish provider-specific migration packs (Qiskit Runtime -> NxQuantum, Braket workflows -> NxQuantum, Azure workflows -> NxQuantum).
+- [ ] Publish runnable side-by-side tutorials for equivalent workloads on top-3 providers (estimation, sampling, transpilation constraints).
+- [ ] Publish benchmark matrix with reproducible scripts and explicit provider caveats.
+- [ ] Add support-tier policy (`stable`, `beta`, `experimental`) and release-note templates per provider adapter.
+- [ ] Publish observability conventions guide and starter dashboards for top-3 provider workflows.
+- [ ] Complete release-quality gates for v0.5 provider support path.
+
+Milestone K review gate (v0.5 readiness):
+
+1. Top-3 adapters are documented with explicit support tiers, limits, and typed failure contracts.
+2. Migration/tutorial assets are executable and traceable to acceptance scenarios.
+3. Benchmark and case-study evidence are reproducible and tied to exact runtime/provider profiles.
+4. v0.5 release checklist is green (`mix quality`, `mix dialyzer`, docs build, provider smoke lanes).
+5. Observability artifacts (traces/logs/metrics conventions + dashboards) are published and validated.
