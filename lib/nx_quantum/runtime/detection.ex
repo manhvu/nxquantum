@@ -98,14 +98,12 @@ defmodule NxQuantum.Runtime.Detection do
   end
 
   defp safe_fetch_exla_client(client) do
-    try do
-      :erlang.apply(exla_client_module(), :fetch!, [client])
-    rescue
-      _ -> :error
-    catch
-      :exit, _reason -> :error
-      _kind, _reason -> :error
-    end
+    :erlang.apply(exla_client_module(), :fetch!, [client])
+  rescue
+    _ -> :error
+  catch
+    :exit, _reason -> :error
+    _kind, _reason -> :error
   end
 
   defp exla_backend_module, do: :"Elixir.EXLA.Backend"
