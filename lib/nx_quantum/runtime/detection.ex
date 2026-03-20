@@ -48,20 +48,22 @@ defmodule NxQuantum.Runtime.Detection do
   defp detect_profile_available(:cpu_portable), do: true
 
   defp detect_profile_available(:cpu_compiled) do
-    module_loaded?(EXLA.Backend) and exla_client_available?(:host)
+    module_loaded?(exla_backend_module()) and exla_client_available?(:host)
   end
 
   defp detect_profile_available(:nvidia_gpu_compiled) do
-    module_loaded?(EXLA.Backend) and exla_client_available?(:cuda)
+    module_loaded?(exla_backend_module()) and exla_client_available?(:cuda)
   end
 
-  defp detect_profile_available(:torch_interop_runtime), do: module_loaded?(Torchx.Backend)
+  defp detect_profile_available(:torch_interop_runtime), do: module_loaded?(torchx_backend_module())
   defp detect_profile_available(_unknown), do: false
 
   defp module_loaded?(module), do: Code.ensure_loaded?(module)
 
   defp exla_client_available?(client) do
-    if module_loaded?(EXLA.Client) and function_exported?(EXLA.Client, :fetch!, 1) and
+    exla_client_module = exla_client_module()
+
+    if module_loaded?(exla_client_module) and function_exported?(exla_client_module, :fetch!, 1) and
          exla_platform_supported?(client) do
       case safe_fetch_exla_client(client) do
         {:ok, _client} -> true
@@ -74,7 +76,9 @@ defmodule NxQuantum.Runtime.Detection do
   end
 
   defp exla_platform_supported?(platform) do
-    if function_exported?(EXLA.Client, :get_supported_platforms, 0) do
+    exla_client_module = exla_client_module()
+
+    if function_exported?(exla_client_module, :get_supported_platforms, 0) do
       case safe_supported_platforms() do
         platforms when is_map(platforms) -> Map.has_key?(platforms, platform)
         _ -> false
@@ -85,7 +89,7 @@ defmodule NxQuantum.Runtime.Detection do
   end
 
   defp safe_supported_platforms do
-    EXLA.Client.get_supported_platforms()
+    :erlang.apply(exla_client_module(), :get_supported_platforms, [])
   rescue
     _ -> :error
   catch
@@ -94,10 +98,8 @@ defmodule NxQuantum.Runtime.Detection do
   end
 
   defp safe_fetch_exla_client(client) do
-    exla_client_module = :"Elixir.EXLA.Client"
-
     try do
-      :erlang.apply(exla_client_module, :fetch!, [client])
+      :erlang.apply(exla_client_module(), :fetch!, [client])
     rescue
       _ -> :error
     catch
@@ -105,4 +107,8 @@ defmodule NxQuantum.Runtime.Detection do
       _kind, _reason -> :error
     end
   end
+
+  defp exla_backend_module, do: :"Elixir.EXLA.Backend"
+  defp exla_client_module, do: :"Elixir.EXLA.Client"
+  defp torchx_backend_module, do: :"Elixir.Torchx.Backend"
 end

@@ -1,7 +1,7 @@
 defmodule NxQuantum.Architecture.DependencyDirectionTest do
   use ExUnit.Case, async: true
 
-  @root "/Users/diogenes/Projects/diogenes/nxquantum"
+  @root Path.expand("../..", __DIR__)
 
   @domain_files [
     "lib/nx_quantum/circuit.ex",

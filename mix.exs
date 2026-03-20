@@ -12,6 +12,7 @@ defmodule NxQuantum.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
+      test_ignore_filters: test_ignore_filters(),
       docs: docs(),
       dialyzer: dialyzer(),
       description: description(),
@@ -137,6 +138,13 @@ defmodule NxQuantum.MixProject do
         "AGENTS.md",
         "SKILLS.md"
       ]
+    ]
+  end
+
+  defp test_ignore_filters do
+    [
+      ~r{^test/features/.*\.ex$},
+      ~r{^test/support/.*\.ex$}
     ]
   end
 
