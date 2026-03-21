@@ -14,12 +14,7 @@ defmodule NxQuantum.Estimator.Scalar do
     runtime_available? = Keyword.get(opts, :runtime_available?, true)
 
     with {:ok, measured_circuit} <- Measurement.apply(circuit, opts),
-         {:ok, profile} <-
-           Runtime.resolve(
-             runtime_profile,
-             fallback_policy: fallback_policy,
-             runtime_available?: runtime_available?
-           ) do
+         {:ok, profile} <- resolve_runtime_profile(runtime_profile, fallback_policy, runtime_available?) do
       tensor = ExecuteCircuit.expectation(measured_circuit, [runtime_profile: profile] ++ opts)
 
       estimated =
@@ -30,5 +25,17 @@ defmodule NxQuantum.Estimator.Scalar do
 
       {:ok, Nx.tensor(estimated, type: {:f, 32})}
     end
+  end
+
+  defp resolve_runtime_profile(:cpu_portable, _fallback_policy, true) do
+    {:ok, Runtime.profile!(:cpu_portable)}
+  end
+
+  defp resolve_runtime_profile(runtime_profile, fallback_policy, runtime_available?) do
+    Runtime.resolve(
+      runtime_profile,
+      fallback_policy: fallback_policy,
+      runtime_available?: runtime_available?
+    )
   end
 end

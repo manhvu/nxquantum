@@ -110,5 +110,31 @@ defmodule NxQuantum.EstimatorTest do
                  wire: 0
                )
     end
+
+    test "parallel batch execution preserves deterministic values and ordering" do
+      builder = fn theta ->
+        [qubits: 1]
+        |> Circuit.new()
+        |> Gates.ry(0, theta: theta)
+      end
+
+      batch = Nx.tensor([0.0, 0.3, 0.7, 1.1, 1.5, 1.9, 2.2, 2.6], type: {:f, 32})
+
+      assert {:ok, sequential} =
+               Estimator.batched_expectation(builder, batch,
+                 observable: :pauli_z,
+                 wire: 0
+               )
+
+      assert {:ok, parallel} =
+               Estimator.batched_expectation(builder, batch,
+                 observable: :pauli_z,
+                 wire: 0,
+                 parallel: true,
+                 max_concurrency: 4
+               )
+
+      assert Nx.to_flat_list(sequential) == Nx.to_flat_list(parallel)
+    end
   end
 end

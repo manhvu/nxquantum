@@ -65,13 +65,34 @@ defmodule NxQuantum.Estimator do
   end
 
   defp batch_results(circuit_builder, params_batch, opts) do
-    params_batch
-    |> Nx.to_flat_list()
-    |> Enum.map(fn value ->
-      value
-      |> Nx.tensor()
-      |> circuit_builder.()
-      |> expectation_result(opts)
-    end)
+    values = Nx.to_flat_list(params_batch)
+
+    if Keyword.get(opts, :parallel, false) do
+      max_concurrency = Keyword.get(opts, :max_concurrency, System.schedulers_online())
+
+      values
+      |> Task.async_stream(
+        fn value ->
+          value
+          |> Nx.tensor()
+          |> circuit_builder.()
+          |> expectation_result(opts)
+        end,
+        max_concurrency: max_concurrency,
+        ordered: true,
+        timeout: :infinity
+      )
+      |> Enum.map(fn
+        {:ok, result} -> result
+        {:exit, reason} -> {:error, %{code: :batch_parallel_worker_crash, reason: reason}}
+      end)
+    else
+      Enum.map(values, fn value ->
+        value
+        |> Nx.tensor()
+        |> circuit_builder.()
+        |> expectation_result(opts)
+      end)
+    end
   end
 end
