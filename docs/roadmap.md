@@ -177,13 +177,20 @@ Milestone J review gate (before Phase 11):
 
 ## Phase 11 - v0.5 P2: Migration Packs, Adoption Assets, and Release Hardening
 
-- [ ] Publish provider-specific migration packs (Qiskit Runtime -> NxQuantum, Braket workflows -> NxQuantum, Azure workflows -> NxQuantum).
-- [ ] Publish runnable side-by-side tutorials for equivalent workloads on top-3 providers (estimation, sampling, transpilation constraints).
-- [ ] Publish benchmark matrix with reproducible scripts and explicit provider caveats.
-- [ ] Add support-tier policy (`stable`, `beta`, `experimental`) and release-note templates per provider adapter.
-- [ ] Publish observability conventions guide and starter dashboards for top-3 provider workflows.
+- [x] Publish provider-specific migration packs (Qiskit Runtime -> NxQuantum, Braket workflows -> NxQuantum, Azure workflows -> NxQuantum).
+  - `docs/v0.5-migration-packs.md`
+- [x] Publish runnable side-by-side tutorials for equivalent workloads on top-3 providers (estimation, sampling, transpilation constraints).
+  - `examples/livebook/provider_bridge_side_by_side.livemd`
+  - `docs/livebook-tutorials.md`
+- [x] Publish benchmark matrix with reproducible scripts and explicit provider caveats.
+  - `bench/milestone_k.exs`
+  - `docs/v0.5-benchmark-matrix.md`
+- [x] Add support-tier policy (`stable`, `beta`, `experimental`) and release-note templates per provider adapter.
+  - `docs/v0.5-provider-support-tiers.md`
+- [x] Publish observability conventions guide and starter dashboards for top-3 provider workflows.
   - `docs/observability.md`
-- [ ] Complete release-quality gates for v0.5 provider support path.
+  - `docs/observability-dashboards.md`
+- [x] Complete release-quality gates for v0.5 provider support path.
 
 Milestone K review gate (v0.5 readiness):
 

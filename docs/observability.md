@@ -5,6 +5,8 @@ Status note (as of March 20, 2026):
 1. This guide defines the implementation standard for v0.5 provider observability.
 2. Architecture decision source of truth:
    - `docs/adr/0006-opentelemetry-observability-standard.md`
+3. Starter dashboards and rollout conventions:
+   - `docs/observability-dashboards.md`
 
 ## Why This Guide Exists
 

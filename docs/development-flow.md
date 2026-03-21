@@ -36,6 +36,7 @@ mix test.features
 - `mix test.property`
 - `mix test.arch`
 - `mix test.features`
+- `mix test.provider_smoke`
 - `mix test.acceptance` (compatibility alias to `mix test.features`)
 - `mix quality`
 - `mix dialyzer`
@@ -126,3 +127,13 @@ When adding provider or workflow instrumentation:
 3. Add/update step mappings under `test/features/steps/provider_observability_steps.ex`.
 4. Add schema tests for span names/attributes, metric contracts, and log redaction behavior.
 5. Validate profile behavior (`high_level`, `granular`, `forensics`) with deterministic fixtures.
+
+## 9) Provider Release-Hardening Path (v0.5 Milestone K)
+
+When preparing provider release evidence:
+
+1. Update migration assets in `docs/v0.5-migration-packs.md`.
+2. Run and record benchmark evidence via `bench/milestone_k.exs`.
+3. Update support tiers and known limits in `docs/v0.5-provider-support-tiers.md`.
+4. Validate observability dashboards against `docs/observability-dashboards.md`.
+5. Run `mix test.provider_smoke` before final release checklist sign-off.

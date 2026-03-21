@@ -225,6 +225,10 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - side-by-side workflow guides
   - migration playbooks
   - decision matrix and case-study evidence
+  - provider migration packs and release-hardening evidence (`v0.5`):
+    - `docs/v0.5-migration-packs.md`
+    - `docs/v0.5-benchmark-matrix.md`
+    - `docs/v0.5-provider-support-tiers.md`
 - Invariants:
   - claims backed by reproducible scripts/benchmarks
   - limitations explicitly documented

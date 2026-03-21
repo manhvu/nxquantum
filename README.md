@@ -25,7 +25,10 @@ See positioning and comparison details:
 
 - Evaluate vs Python-first workflows: [docs/python-comparison-workflows.md](docs/python-comparison-workflows.md)
 - Plan migration from Python workflows: [docs/migration-python-playbook.md](docs/migration-python-playbook.md)
+- Use provider-specific migration packs: [docs/v0.5-migration-packs.md](docs/v0.5-migration-packs.md)
 - Start interactive tutorials: [docs/livebook-tutorials.md](docs/livebook-tutorials.md)
+- Check provider support tiers and limits: [docs/v0.5-provider-support-tiers.md](docs/v0.5-provider-support-tiers.md)
+- Review reproducible provider benchmark matrix: [docs/v0.5-benchmark-matrix.md](docs/v0.5-benchmark-matrix.md)
 - Review benchmark narrative evidence: [docs/case-study-beam-integration.md](docs/case-study-beam-integration.md)
 
 ## Quick Start
@@ -53,8 +56,8 @@ For full setup and API walkthroughs and usage examples:
 
 ## What Is Still Planned
 
-- Deeper hardware-provider integrations and calibration workflows.
-- Broader provider-specific execution flows and production adapters.
+- Additional provider depth beyond top-3 v0.5 adapters.
+- Broader provider-native dynamic and non-gate-model paths.
 - More benchmark-backed case studies across real BEAM deployment patterns.
 
 Track status here:
@@ -78,8 +81,13 @@ Track status here:
 - [docs/api-stability.md](docs/api-stability.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/observability.md](docs/observability.md)
+- [docs/observability-dashboards.md](docs/observability-dashboards.md)
 - [docs/v0.5-feature-spec.md](docs/v0.5-feature-spec.md)
 - [docs/v0.5-provider-implementation-plan.md](docs/v0.5-provider-implementation-plan.md)
+- [docs/v0.5-acceptance-criteria.md](docs/v0.5-acceptance-criteria.md)
+- [docs/v0.5-migration-packs.md](docs/v0.5-migration-packs.md)
+- [docs/v0.5-benchmark-matrix.md](docs/v0.5-benchmark-matrix.md)
+- [docs/v0.5-provider-support-tiers.md](docs/v0.5-provider-support-tiers.md)
 
 ## Contributing
 

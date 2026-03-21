@@ -1,0 +1,95 @@
+# NxQuantum v0.5: ProviderBridge Side-by-Side (Fixture Lane)
+
+```elixir
+Mix.install(path: "../..")
+```
+
+This tutorial runs equivalent lifecycle workloads against top-3 providers using deterministic fixture data.
+
+## 1) Aliases and shared payload
+
+```elixir
+alias NxQuantum.Adapters.Providers.AwsBraket
+alias NxQuantum.Adapters.Providers.AzureQuantum
+alias NxQuantum.Adapters.Providers.IBMRuntime
+alias NxQuantum.ProviderBridge
+
+payload = %{workflow: :sampler, shots: 1024}
+```
+
+## 2) Provider option packs
+
+```elixir
+provider_cases = [
+  {:ibm_runtime, IBMRuntime,
+   [
+     target: "ibm_backend_simulator",
+     provider_config: %{auth_token: "ibm-token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
+   ]},
+  {:aws_braket, AwsBraket,
+   [
+     target: "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
+     provider_config: %{
+       region: "us-east-1",
+       credentials_profile: "default",
+       device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+     }
+   ]},
+  {:azure_quantum, AzureQuantum,
+   [
+     target: "azure.quantum.sim",
+     provider_config: %{
+       workspace: "ws-1",
+       auth_context: "managed_identity",
+       target_id: "azure.quantum.sim",
+       provider_name: "microsoft"
+     }
+   ]}
+]
+```
+
+## 3) Execute side-by-side lifecycle
+
+```elixir
+results =
+  Enum.map(provider_cases, fn {provider_id, adapter, opts} ->
+    {provider_id, ProviderBridge.run_lifecycle(adapter, payload, opts)}
+  end)
+
+results
+```
+
+## 4) Compare normalized envelope keys
+
+```elixir
+normalized_key_sets =
+  Enum.map(results, fn {provider_id, {:ok, %{result: result}}} ->
+    {provider_id, Map.keys(result) |> Enum.sort()}
+  end)
+
+normalized_key_sets
+```
+
+Expected common result keys:
+
+1. `:job_id`
+2. `:state`
+3. `:provider`
+4. `:target`
+5. `:payload`
+6. `:metadata`
+
+## 5) Validate deterministic contract shape
+
+```elixir
+[first | rest] = normalized_key_sets
+
+deterministic_shape? =
+  Enum.all?(rest, fn {_provider_id, keys} ->
+    keys == elem(first, 1)
+  end)
+
+deterministic_shape?
+```
+
+If `deterministic_shape?` is true, top-3 providers are emitting the same normalized result envelope structure.

@@ -79,10 +79,11 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
       text == "provider-specific migration packs and benchmark reports are published" ->
         {:handled,
          Map.put(ctx, :evidence_paths, [
-           "docs/migration-python-playbook.md",
-           "docs/python-comparison-workflows.md",
-           "docs/decision-matrix.md",
-           "docs/v0.5-acceptance-criteria.md"
+           "docs/v0.5-migration-packs.md",
+           "docs/v0.5-benchmark-matrix.md",
+           "docs/v0.5-provider-support-tiers.md",
+           "examples/livebook/provider_bridge_side_by_side.livemd",
+           "docs/observability-dashboards.md"
          ])}
 
       text == "a provider adapter supports submit, poll, and fetch_result" ->
@@ -204,11 +205,16 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
         {:handled, ctx}
 
       text == "each claim references benchmark or deterministic fixture evidence" ->
-        assert File.read!("docs/v0.5-acceptance-criteria.md") =~ "Feature Acceptance Criteria"
+        benchmark_doc = File.read!("docs/v0.5-benchmark-matrix.md")
+        assert benchmark_doc =~ "bench/milestone_k.exs"
+        assert benchmark_doc =~ "Provider Caveats"
         {:handled, ctx}
 
       text == "support tiers and known limits are documented per provider" ->
-        assert File.read!("docs/roadmap.md") =~ "support-tier"
+        support_tiers = File.read!("docs/v0.5-provider-support-tiers.md")
+        assert support_tiers =~ "stable"
+        assert support_tiers =~ "beta"
+        assert support_tiers =~ "Known limits"
         {:handled, ctx}
 
       text == ~s(response includes "submitted", "polled", and "result" sections) ->

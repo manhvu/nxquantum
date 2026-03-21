@@ -46,6 +46,11 @@ jobs:
           MIX_ENV: test
         run: mix ci
 
+      - name: Provider smoke lane
+        env:
+          MIX_ENV: test
+        run: mix test.provider_smoke
+
       - name: Build package
         run: mix hex.build
 

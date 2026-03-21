@@ -56,3 +56,6 @@ Track explicit gaps while migrating:
 - [docs/getting-started.md](getting-started.md)
 - [docs/python-comparison-workflows.md](python-comparison-workflows.md)
 - [docs/decision-matrix.md](decision-matrix.md)
+- [docs/v0.5-migration-packs.md](v0.5-migration-packs.md)
+- [docs/v0.5-provider-support-tiers.md](v0.5-provider-support-tiers.md)
+- [docs/v0.5-benchmark-matrix.md](v0.5-benchmark-matrix.md)

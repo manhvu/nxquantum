@@ -10,9 +10,10 @@
 
 1. `mix quality`
 2. `mix dialyzer`
-3. `mix docs.build`
-4. `mix hex.build`
-5. Update roadmap/spec status and release notes summary.
+3. `mix test.provider_smoke`
+4. `mix docs.build`
+5. `mix hex.build`
+6. Update roadmap/spec status and release notes summary.
 
 ## CI Release Automation
 
@@ -39,3 +40,13 @@ Use the repository publishing flow:
 Dry-run before publish:
 
 1. `mix hex.publish --dry-run`
+
+## v0.5 Provider Evidence Bundle
+
+Include these references in the release PR or release note:
+
+1. `docs/v0.5-migration-packs.md`
+2. `docs/v0.5-benchmark-matrix.md`
+3. `docs/v0.5-provider-support-tiers.md`
+4. `docs/observability.md`
+5. `docs/observability-dashboards.md`
