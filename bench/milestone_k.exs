@@ -31,18 +31,23 @@ providers = [
 ]
 
 iterations = 30
+warmup_iterations = 20
 payload = %{workflow: :sampler, shots: 1024}
 
-measure_ms = fn fun ->
-  {microseconds, result} = :timer.tc(fun)
-  {Float.round(microseconds / 1000.0, 3), result}
+measure_us = fn fun ->
+  :timer.tc(fun)
 end
 
 stats =
   Map.new(providers, fn {provider_id, adapter, adapter_opts} ->
+    for _ <- 1..warmup_iterations do
+      _ = ProviderBridge.run_lifecycle(adapter, payload, adapter_opts)
+    end
+
     measurements =
       for _ <- 1..iterations do
-        {latency_ms, result} = measure_ms.(fn -> ProviderBridge.run_lifecycle(adapter, payload, adapter_opts) end)
+        {latency_us, result} = measure_us.(fn -> ProviderBridge.run_lifecycle(adapter, payload, adapter_opts) end)
+        latency_ms = latency_us / 1000.0
         %{latency_ms: latency_ms, result: result}
       end
 

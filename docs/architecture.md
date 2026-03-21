@@ -43,6 +43,14 @@ Behavior ownership is defined by executable features, not by file location alone
 - `NxQuantum.Ports.Backend`
   - `compile/3`
   - `default_options/0`
+- `NxQuantum.Ports.Provider`
+  - `capabilities/2`
+  - `submit/2`
+  - `poll/2`
+  - `cancel/2`
+  - `fetch_result/2`
+- `NxQuantum.Ports.ObservabilityEmitter`
+  - `emit/4`
 
 ## v0.2 Facade Modules
 
@@ -62,10 +70,34 @@ Current internal decomposition examples:
 - Transpilation internals: `NxQuantum.Transpiler.Topology`, `NxQuantum.Transpiler.Router`, `NxQuantum.Transpiler.SwapInsertion`, `NxQuantum.Transpiler.Report`.
 - Differentiation internals: `NxQuantum.Grad.Numeric`, `NxQuantum.Grad.Adjoint`, `NxQuantum.Grad.Error`.
 - Simulator internals: `NxQuantum.Adapters.Simulators.StateVector.State`, `NxQuantum.Adapters.Simulators.StateVector.Matrices`.
+- Provider lifecycle internals:
+  - `NxQuantum.Application.ProviderLifecycle.Runner`
+  - `NxQuantum.Application.ProviderLifecycle.Dispatcher`
+  - `NxQuantum.Application.ProviderLifecycle.Preflight`
+  - `NxQuantum.Application.ProviderLifecycle.ErrorMapper`
+  - `NxQuantum.Application.ProviderLifecycle.Commands.*`
+  - `NxQuantum.ProviderBridge.Job`
+  - `NxQuantum.ProviderBridge.Result`
+  - `NxQuantum.ProviderBridge.ProviderError`
+  - `NxQuantum.ProviderBridge.CapabilityContract`
+- State-vector internals:
+  - `NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary`
+  - `NxQuantum.Adapters.Simulators.StateVector.CompiledPlan`
+  - `NxQuantum.Adapters.Simulators.StateVector.Operations`
+  - `NxQuantum.Adapters.Simulators.StateVector.Cache`
+  - `NxQuantum.Adapters.Simulators.StateVector.KeyEncoder`
 - Compiler internals: `NxQuantum.Compiler.PassPipeline`, `NxQuantum.Compiler.Passes.*`, `NxQuantum.Compiler.Theta`.
 - Mitigation internals: `NxQuantum.Mitigation.PassPipeline`, `NxQuantum.Mitigation.Passes.Readout`, `NxQuantum.Mitigation.Passes.ZneLinear`, `NxQuantum.Mitigation.Trace`.
 - Runtime internals: `NxQuantum.Runtime.Catalog`, `NxQuantum.Runtime.Detection`, `NxQuantum.Runtime.Fallback`.
 - Sampler internals: `NxQuantum.Sampler.Options`, `NxQuantum.Sampler.Engine`, `NxQuantum.Sampler.ResultBuilder`.
+- Batch/reproducibility internals:
+  - `NxQuantum.Application.BatchExecutor`
+  - `NxQuantum.Random.Seed`
+- Observability internals:
+  - `NxQuantum.Observability.ProfileStrategy`
+  - `NxQuantum.Observability.ProfileStrategy.HighLevel`
+  - `NxQuantum.Observability.ProfileStrategy.Granular`
+  - `NxQuantum.Observability.ProfileStrategy.Forensics`
 - Circuit domain invariants: `NxQuantum.Circuit.Validation`, `NxQuantum.Circuit.Error`.
 - Shared observable/measurement schema: `NxQuantum.Observables.Schema`, `NxQuantum.Observables.Error`.
 

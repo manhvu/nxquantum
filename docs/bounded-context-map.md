@@ -179,7 +179,18 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - provider lifecycle orchestration through `NxQuantum.ProviderBridge`
 - Domain/application modules:
   - dynamic execution interpreter (supported subset)
-  - provider lifecycle contract objects (`NxQuantum.Ports.Provider`, `NxQuantum.ProviderBridge`)
+  - provider lifecycle facade (`NxQuantum.ProviderBridge`) delegating to:
+    - `NxQuantum.Application.ProviderLifecycle.Runner`
+    - `NxQuantum.Application.ProviderLifecycle.Dispatcher`
+    - `NxQuantum.Application.ProviderLifecycle.Preflight`
+    - `NxQuantum.Application.ProviderLifecycle.ErrorMapper`
+    - `NxQuantum.Application.ProviderLifecycle.Commands.*`
+  - provider lifecycle contract objects:
+    - `NxQuantum.ProviderBridge.Job`
+    - `NxQuantum.ProviderBridge.Result`
+    - `NxQuantum.ProviderBridge.ProviderError`
+    - `NxQuantum.ProviderBridge.CapabilityContract`
+  - provider lifecycle port contract (`NxQuantum.Ports.Provider`)
   - capability preflight domain contract (`NxQuantum.Providers.Capabilities`)
   - provider config/redaction contracts (`NxQuantum.Providers.Config`, `NxQuantum.Providers.Redaction`)
   - calibration payload validation contracts
@@ -187,19 +198,44 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.Adapters.Providers.IBMRuntime`
   - `NxQuantum.Adapters.Providers.AwsBraket`
   - `NxQuantum.Adapters.Providers.AzureQuantum`
+  - `NxQuantum.Adapters.Providers.Common.LifecycleSupport`
   - `NxQuantum.Adapters.Providers.Common.StateMapper`
   - `NxQuantum.Adapters.Observability.OpenTelemetry`
   - `NxQuantum.Adapters.Observability.Noop`
 - Observability modules:
   - `NxQuantum.Observability`
   - `NxQuantum.Observability.Profile`
+  - `NxQuantum.Observability.ProfileStrategy`
+  - `NxQuantum.Observability.ProfileStrategy.HighLevel`
+  - `NxQuantum.Observability.ProfileStrategy.Granular`
+  - `NxQuantum.Observability.ProfileStrategy.Forensics`
   - `NxQuantum.Observability.Fingerprint`
   - `NxQuantum.Observability.PortabilityDelta`
 - Invariants:
   - deterministic dynamic branch execution for supported subset
   - typed provider lifecycle and capability/error diagnostics
   - deterministic unsupported-capability preflight (no silent provider fallback)
+  - uniform workflow validation behavior across providers
   - profile-driven telemetry depth with deterministic schema fields
+
+### 10.1) State-Vector Execution Planning Subcontext (v0.5 P0 active)
+
+- Features:
+  - `features/primitives_api.feature`
+  - `features/quantum_kernel_methods.feature`
+- Application/domain modules:
+  - `NxQuantum.Adapters.Simulators.StateVector.Matrices` (facade)
+  - `NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary`
+  - `NxQuantum.Adapters.Simulators.StateVector.CompiledPlan`
+  - `NxQuantum.Adapters.Simulators.StateVector.Operations`
+  - `NxQuantum.Adapters.Simulators.StateVector.Cache`
+  - `NxQuantum.Adapters.Simulators.StateVector.KeyEncoder`
+  - `NxQuantum.Application.BatchExecutor`
+  - `NxQuantum.Random.Seed`
+- Invariants:
+  - compiled-plan semantic equivalence with matrix execution
+  - deterministic cache behavior under bounded eviction
+  - deterministic seeded behavior for estimator/sampler/kernel entrypoints
 
 ### 11) Scale and Performance Context (Planned v0.4)
 
