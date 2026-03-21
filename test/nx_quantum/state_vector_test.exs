@@ -1,6 +1,8 @@
 defmodule NxQuantum.StateVectorTest do
   use ExUnit.Case, async: true
 
+  alias NxQuantum.Adapters.Simulators.StateVector.Matrices
+  alias NxQuantum.Adapters.Simulators.StateVector.State
   alias NxQuantum.Circuit
   alias NxQuantum.Gates
 
@@ -66,5 +68,27 @@ defmodule NxQuantum.StateVectorTest do
       |> Nx.to_number()
 
     assert_in_delta expectation, 0.0, 1.0e-6
+  end
+
+  test "pauli-z fast expectation matches dense observable expectation" do
+    qubits = 3
+
+    state =
+      [qubits: qubits]
+      |> Circuit.new()
+      |> Gates.h(0)
+      |> Gates.ry(1, theta: 0.41)
+      |> Gates.cnot(control: 1, target: 2)
+      |> then(fn circuit ->
+        State.apply_operations(State.initial_state(qubits), circuit.operations)
+      end)
+
+    wire = 2
+    observable_matrix = Matrices.observable_matrix(:pauli_z, wire, qubits)
+
+    dense = state |> State.expectation_from_state(observable_matrix) |> Nx.to_number()
+    fast = state |> State.expectation_pauli_z(wire, qubits) |> Nx.to_number()
+
+    assert_in_delta fast, dense, 1.0e-8
   end
 end

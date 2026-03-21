@@ -22,6 +22,20 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.Matrices do
   def observable_matrix(:pauli_y, wire, qubits),
     do: cached_matrix({:observable, :pauli_y, wire, qubits}, fn -> full_single_wire_matrix(pauli_y(), wire, qubits) end)
 
+  @spec pauli_z_signs(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def pauli_z_signs(wire, qubits) do
+    cached_matrix({:observable, :pauli_z_signs, wire, qubits}, fn ->
+      size = trunc(:math.pow(2, qubits))
+
+      signs =
+        for index <- 0..(size - 1) do
+          if (index >>> wire &&& 1) == 1, do: -1.0, else: 1.0
+        end
+
+      Nx.tensor(signs, type: {:f, 64})
+    end)
+  end
+
   @spec gate_matrix(GateOperation.t(), pos_integer()) :: Nx.Tensor.t()
   def gate_matrix(%GateOperation{name: :h, wires: [wire]}, qubits),
     do: cached_matrix({:gate, :h, wire, qubits}, fn -> full_single_wire_matrix(hadamard(), wire, qubits) end)
@@ -58,6 +72,51 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.Matrices do
 
   def gate_matrix(%GateOperation{name: name}, _qubits) do
     raise ArgumentError, "unsupported gate #{inspect(name)}"
+  end
+
+  @spec single_qubit_gate_matrix(GateOperation.t()) :: Nx.Tensor.t()
+  def single_qubit_gate_matrix(%GateOperation{name: :h}), do: cached_matrix({:single_gate, :h}, &hadamard/0)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :x}), do: cached_matrix({:single_gate, :x}, &pauli_x/0)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :y}), do: cached_matrix({:single_gate, :y}, &pauli_y/0)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :z}), do: cached_matrix({:single_gate, :z}, &pauli_z/0)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :rx, params: params}),
+    do:
+      cached_matrix({:single_gate, :rx, theta_key(Map.fetch!(params, :theta))}, fn ->
+        rx_matrix(Map.fetch!(params, :theta))
+      end)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :ry, params: params}),
+    do:
+      cached_matrix({:single_gate, :ry, theta_key(Map.fetch!(params, :theta))}, fn ->
+        ry_matrix(Map.fetch!(params, :theta))
+      end)
+
+  def single_qubit_gate_matrix(%GateOperation{name: :rz, params: params}),
+    do:
+      cached_matrix({:single_gate, :rz, theta_key(Map.fetch!(params, :theta))}, fn ->
+        rz_matrix(Map.fetch!(params, :theta))
+      end)
+
+  def single_qubit_gate_matrix(%GateOperation{name: name}) do
+    raise ArgumentError, "unsupported single-qubit gate #{inspect(name)}"
+  end
+
+  @spec cnot_permutation(non_neg_integer(), non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def cnot_permutation(control, target, qubits) do
+    cached_matrix({:gate, :cnot, :permutation, control, target, qubits}, fn ->
+      size = trunc(:math.pow(2, qubits))
+
+      mapped =
+        for index <- 0..(size - 1) do
+          map_cnot_column(index, control, target)
+        end
+
+      Nx.tensor(mapped, type: {:s, 64})
+    end)
   end
 
   defp full_single_wire_matrix(single_gate, wire, qubits) do

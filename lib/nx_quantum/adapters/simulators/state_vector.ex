@@ -28,16 +28,20 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
       |> State.apply_operations(circuit.operations)
 
     %{observable: observable, wire: wire} = circuit.measurement
-    observable_matrix = Matrices.observable_matrix(observable, wire, circuit.qubits)
-
-    state
-    |> State.expectation_from_state(observable_matrix)
-    |> Nx.as_type({:f, 32})
+    value = expectation_for_observable(state, observable, wire, circuit.qubits)
+    Nx.as_type(value, {:f, 32})
   end
 
   @impl true
   @spec apply_gates(state_vector(), [GateOperation.t()], keyword()) :: state_vector()
   def apply_gates(%Nx.Tensor{} = state, operations, _opts) when is_list(operations) do
     State.apply_operations(state, operations)
+  end
+
+  defp expectation_for_observable(state, :pauli_z, wire, qubits), do: State.expectation_pauli_z(state, wire, qubits)
+
+  defp expectation_for_observable(state, observable, wire, qubits) do
+    observable_matrix = Matrices.observable_matrix(observable, wire, qubits)
+    State.expectation_from_state(state, observable_matrix)
   end
 end

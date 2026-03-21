@@ -55,11 +55,11 @@ python bench/python_alternatives_benchmark.py --iterations 500 --warmup 50 --nx-
 
 | Framework lane | Requested profile | Resolved profile | ms/op |
 | --- | --- | --- | ---: |
-| NxQuantum | `cpu_portable` | `cpu_portable` | 0.041891 |
-| NxQuantum | `cpu_compiled` | `cpu_portable` | 0.041559 |
-| Qiskit | n/a | n/a | 0.103706 |
-| PennyLane | n/a | n/a | 0.405602 |
-| Cirq | n/a | n/a | 0.340328 |
+| NxQuantum | `cpu_portable` | `cpu_portable` | 0.031415 |
+| NxQuantum | `cpu_compiled` | `cpu_portable` | 0.031536 |
+| Qiskit | n/a | n/a | 0.103161 |
+| PennyLane | n/a | n/a | 0.404916 |
+| Cirq | n/a | n/a | 0.340024 |
 
 ## Previous 3-run Baseline (before optimization pass)
 
@@ -78,16 +78,22 @@ python bench/python_alternatives_benchmark.py --iterations 500 --warmup 50 --nx-
 
 | Framework lane | Requested profile | Resolved profile | ms/op |
 | --- | --- | --- | ---: |
-| NxQuantum | `cpu_portable` | `cpu_portable` | 17.472098 |
-| NxQuantum | `cpu_compiled` | `cpu_portable` | 17.252916 |
-| Qiskit | n/a | n/a | 0.303125 |
-| PennyLane | n/a | n/a | 1.149950 |
-| Cirq | n/a | n/a | 0.896668 |
+| NxQuantum | `cpu_portable` | `cpu_portable` | 0.567794 |
+| NxQuantum | `cpu_compiled` | `cpu_portable` | 0.558948 |
+| Qiskit | n/a | n/a | 0.304531 |
+| PennyLane | n/a | n/a | 1.145300 |
+| Cirq | n/a | n/a | 0.905470 |
+
+Deep scenario delta after structured state-vector gate application refactor:
+
+1. NxQuantum (`cpu_portable`) improved from `17.58 ms/op` to `0.57 ms/op` (~31x faster on this machine).
+2. Remaining gap vs Qiskit in `deep_6q` is now ~1.8x (down from ~57x previously).
 
 Interpretation:
 
 1. NxQuantum remains fastest on `baseline_2q` in this environment.
-2. For `deep_6q`, current state-vector implementation is significantly slower than Qiskit/Cirq and should be treated as an optimization target.
+2. For `deep_6q`, NxQuantum is now in the same sub-millisecond class and materially closer to Qiskit/Cirq.
+3. Further gains should prioritize reducing per-gate reshape/transpose overhead and adding compiled-runtime lanes when available.
 
 ## Notes and Caveats
 
