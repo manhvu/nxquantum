@@ -5,14 +5,15 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
 
   @behaviour NxQuantum.Ports.Provider
 
+  alias NxQuantum.Adapters.Providers.Common.LifecycleSupport
   alias NxQuantum.Adapters.Providers.Common.StateMapper
-  alias NxQuantum.ProviderBridge.Errors
+  alias NxQuantum.ProviderBridge.Job
   alias NxQuantum.Providers.Config
 
   @submit_states %{"SUBMITTED" => :submitted, "WAITING" => :queued, "EXECUTING" => :running}
   @poll_states Map.merge(@submit_states, %{"SUCCEEDED" => :completed, "CANCELLED" => :cancelled, "FAILED" => :failed})
 
-  @capabilities %{
+  @capabilities %NxQuantum.ProviderBridge.CapabilityContract{
     supports_estimator: true,
     supports_sampler: true,
     supports_batch: true,
@@ -30,23 +31,22 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
 
   @impl true
   def submit(payload, opts \\ []) when is_map(payload) do
-    with :ok <- maybe_force_error(:submit, opts),
+    with :ok <- LifecycleSupport.maybe_force_error(:submit, opts),
          {:ok, config} <-
            Config.fetch_required(provider_id(), opts, [:workspace, :auth_context, :target_id, :provider_name], :submit),
-         :ok <- validate_target_provider_match(config, opts),
-         {:ok, raw_state} <- raw_state(:submit, opts),
+         {:ok, raw_state} <- LifecycleSupport.raw_state(:submit, opts, &default_raw_state/1),
          {:ok, state, metadata} <-
            StateMapper.map(:submit, provider_id(), @submit_states, raw_state, target(opts), %{
              workflow: Map.get(payload, :workflow),
              shots: Map.get(payload, :shots)
            }) do
       {:ok,
-       %{
+       %Job{
          id: job_id(payload, opts),
          state: state,
          provider: provider_id(),
          target: target(opts),
-         submitted_at: submitted_at(opts),
+         submitted_at: LifecycleSupport.submitted_at(opts),
          metadata:
            Map.merge(metadata, %{
              provider_payload_version: "azure.v1",
@@ -58,82 +58,37 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
   end
 
   @impl true
-  def poll(job, opts \\ []) when is_map(job) do
-    with :ok <- maybe_force_error(:poll, opts),
-         {:ok, raw_state} <- raw_state(:poll, opts),
+  def poll(%Job{} = job, opts \\ []) do
+    with :ok <- LifecycleSupport.maybe_force_error(:poll, opts),
+         {:ok, raw_state} <- LifecycleSupport.raw_state(:poll, opts, &default_raw_state/1),
          {:ok, state, metadata} <-
-           StateMapper.map(:poll, provider_id(), @poll_states, raw_state, job[:target], %{job_id: job[:id]}) do
-      {:ok, %{job | state: state, metadata: Map.merge(job[:metadata] || %{}, metadata)}}
+           StateMapper.map(:poll, provider_id(), @poll_states, raw_state, job.target, %{job_id: job.id}) do
+      {:ok, %{job | state: state, metadata: Map.merge(job.metadata || %{}, metadata)}}
     end
   end
 
   @impl true
-  def cancel(job, opts \\ []) when is_map(job) do
-    with :ok <- maybe_force_error(:cancel, opts),
-         {:ok, raw_state} <- raw_state(:cancel, opts),
+  def cancel(%Job{} = job, opts \\ []) do
+    with :ok <- LifecycleSupport.maybe_force_error(:cancel, opts),
+         {:ok, raw_state} <- LifecycleSupport.raw_state(:cancel, opts, &default_raw_state/1),
          {:ok, state, metadata} <-
-           StateMapper.map(:cancel, provider_id(), %{"CANCELLED" => :cancelled}, raw_state, job[:target], %{
-             job_id: job[:id]
+           StateMapper.map(:cancel, provider_id(), %{"CANCELLED" => :cancelled}, raw_state, job.target, %{
+             job_id: job.id
            }) do
       caveat = Keyword.get(opts, :cancellation_caveat, nil)
 
       {:ok,
-       %{job | state: state, metadata: Map.merge(job[:metadata] || %{}, Map.put(metadata, :cancellation_caveat, caveat))}}
+       %{job | state: state, metadata: Map.merge(job.metadata || %{}, Map.put(metadata, :cancellation_caveat, caveat))}}
     end
   end
 
   @impl true
-  def fetch_result(%{state: state} = job, opts \\ []) do
-    with :ok <- maybe_force_error(:fetch_result, opts),
-         :ok <- validate_terminal_state(state) do
+  def fetch_result(%Job{state: state} = job, opts \\ []) do
+    with :ok <- LifecycleSupport.maybe_force_error(:fetch_result, opts),
+         :ok <- LifecycleSupport.validate_terminal_state(state) do
       payload = Keyword.get(opts, :fixture_payload, default_payload(job))
 
-      {:ok,
-       %{
-         job_id: job.id,
-         state: state,
-         provider: provider_id(),
-         target: job.target,
-         payload: payload,
-         metadata: %{
-           raw_payload: payload,
-           raw_state: (job.metadata || %{})[:raw_state],
-           provider_payload_version: "azure.v1",
-           caveats: caveats(opts)
-         }
-       }}
-    end
-  end
-
-  defp validate_target_provider_match(config, opts) do
-    mismatch? = Keyword.get(opts, :provider_target_mismatch, false)
-
-    if mismatch? do
-      {:error,
-       Errors.capability_mismatch(:submit, provider_id(), :target_provider_match,
-         metadata: %{workspace: config.workspace, target: config.target_id, provider_name: config.provider_name}
-       )}
-    else
-      :ok
-    end
-  end
-
-  defp validate_terminal_state(state) when state in [:completed, :cancelled, :failed], do: :ok
-  defp validate_terminal_state(state), do: {:error, {:invalid_state, state}}
-
-  defp maybe_force_error(operation, opts) do
-    case opts[:force_error] do
-      {^operation, reason} -> {:error, reason}
-      _ -> :ok
-    end
-  end
-
-  defp raw_state(operation, opts) do
-    raw_states = opts[:raw_states] || %{}
-
-    case Map.get(raw_states, operation, default_raw_state(operation)) do
-      state when is_binary(state) -> {:ok, state}
-      other -> {:error, {:invalid_response, operation, other}}
+      {:ok, LifecycleSupport.result(job, provider_id(), "azure.v1", payload, caveats: caveats(opts))}
     end
   end
 
@@ -141,16 +96,7 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
   defp default_raw_state(:poll), do: "SUCCEEDED"
   defp default_raw_state(:cancel), do: "CANCELLED"
 
-  defp default_payload(job) do
-    shots = get_in(job, [:metadata, :shots]) || 0
-    zero_count = div(shots, 2)
-
-    %{
-      workflow: "sampler",
-      counts: %{"00" => zero_count, "11" => shots - zero_count},
-      metadata: %{job_id: job.id, source: "fixture", shots: shots}
-    }
-  end
+  defp default_payload(%Job{} = job), do: LifecycleSupport.default_sampler_payload(job)
 
   defp caveats(opts) do
     case Keyword.get(opts, :cancellation_caveat) do
@@ -159,25 +105,11 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
     end
   end
 
-  defp submitted_at(opts), do: Keyword.get(opts, :submitted_at)
-
   defp job_id(payload, opts) do
-    Keyword.get_lazy(opts, :job_id, fn ->
-      digest =
-        :sha256
-        |> :crypto.hash(:erlang.term_to_binary(%{payload: payload, target: target(opts)}))
-        |> Base.encode16(case: :lower)
-        |> binary_part(0, 12)
-
-      "azure_job_#{digest}"
-    end)
+    LifecycleSupport.deterministic_job_id("azure_job", payload, target(opts), opts)
   end
 
   defp target(opts) do
-    Keyword.get_lazy(opts, :target, fn ->
-      opts
-      |> Keyword.get(:provider_config, %{})
-      |> Map.get(:target_id, "unknown_target")
-    end)
+    LifecycleSupport.target(opts, :target_id, "unknown_target")
   end
 end

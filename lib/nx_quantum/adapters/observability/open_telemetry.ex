@@ -1,6 +1,7 @@
 defmodule NxQuantum.Adapters.Observability.OpenTelemetry do
   @moduledoc false
 
+  NxQuantum.Ports.ObservabilityEmitter
   @store_key :nxq_observability_store
 
   @spec reset() :: :ok

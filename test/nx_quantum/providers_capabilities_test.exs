@@ -2,6 +2,7 @@ defmodule NxQuantum.ProvidersCapabilitiesTest do
   use ExUnit.Case, async: true
 
   alias NxQuantum.ProviderBridge
+  alias NxQuantum.ProviderBridge.CapabilityContract
   alias NxQuantum.Providers.Capabilities
 
   defmodule PreflightStubProvider do
@@ -43,7 +44,7 @@ defmodule NxQuantum.ProvidersCapabilitiesTest do
   end
 
   test "validate_contract/4 accepts v1 capability envelope" do
-    capability = %{
+    capability = %CapabilityContract{
       supports_estimator: true,
       supports_sampler: true,
       supports_batch: true,
@@ -53,7 +54,8 @@ defmodule NxQuantum.ProvidersCapabilitiesTest do
       target_class: :gate_model
     }
 
-    assert {:ok, ^capability} = Capabilities.validate_contract(capability, :ibm_runtime, :v1, "ibm_backend")
+    assert {:ok, ^capability} =
+             Capabilities.validate_contract(Map.from_struct(capability), :ibm_runtime, :v1, "ibm_backend")
   end
 
   test "validate_contract/4 rejects malformed capability envelope" do
@@ -72,7 +74,7 @@ defmodule NxQuantum.ProvidersCapabilitiesTest do
   end
 
   test "preflight/4 rejects unsupported dynamic workflows with typed capability mismatch" do
-    capability = %{
+    capability = %CapabilityContract{
       supports_estimator: false,
       supports_sampler: true,
       supports_batch: true,

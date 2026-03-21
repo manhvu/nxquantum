@@ -3,6 +3,7 @@ defmodule NxQuantum.Providers.Capabilities do
   Provider capability contract v1 validation and deterministic preflight checks.
   """
 
+  alias NxQuantum.ProviderBridge.CapabilityContract
   alias NxQuantum.ProviderBridge.Errors
 
   @contract_version :v1
@@ -21,15 +22,7 @@ defmodule NxQuantum.Providers.Capabilities do
 
   @type contract_version :: :v1
 
-  @type contract :: %{
-          required(:supports_estimator) => boolean(),
-          required(:supports_sampler) => boolean(),
-          required(:supports_batch) => boolean(),
-          required(:supports_dynamic) => boolean(),
-          required(:supports_cancel_in_running) => boolean(),
-          required(:supports_calibration_payload) => boolean(),
-          required(:target_class) => :gate_model | :analog | :simulator
-        }
+  @type contract :: CapabilityContract.t()
 
   @type request :: %{
           optional(:workflow) => atom(),
@@ -68,7 +61,7 @@ defmodule NxQuantum.Providers.Capabilities do
          )}
 
       true ->
-        {:ok, Map.take(capabilities, @required_keys)}
+        {:ok, struct(CapabilityContract, Map.take(capabilities, @required_keys))}
     end
   end
 

@@ -6,6 +6,9 @@ defmodule NxQuantum.Observability do
   alias NxQuantum.Observability.Fingerprint
   alias NxQuantum.Observability.PortabilityDelta
   alias NxQuantum.Observability.Profile
+  alias NxQuantum.Observability.ProfileStrategy.Forensics
+  alias NxQuantum.Observability.ProfileStrategy.Granular
+  alias NxQuantum.Observability.ProfileStrategy.HighLevel
 
   @default_adapter NxQuantum.Adapters.Observability.Noop
 
@@ -99,22 +102,18 @@ defmodule NxQuantum.Observability do
       visibility_profile: Profile.normalize(Keyword.get(opts, :profile, :high_level))
     }
 
-    adapter.metric_emit("nxq.provider.request.latency_ms", :histogram, "ms", 1.0, labels, opts)
-
-    counter_name = if status == :ok, do: "nxq.workflow.success.count", else: "nxq.workflow.failure.count"
-    adapter.metric_emit(counter_name, :counter, "count", 1, labels, opts)
-
-    if operation == :poll and Profile.normalize(Keyword.get(opts, :profile, :high_level)) in [:granular, :forensics] do
-      adapter.metric_emit("nxq.provider.queue_wait_ms", :histogram, "ms", 0.5, labels, opts)
-      adapter.metric_emit("nxq.provider.execution_ms", :histogram, "ms", 0.5, labels, opts)
-    end
-
-    if status == :error do
-      adapter.metric_emit("nxq.provider.error.count", :counter, "count", 1, labels, opts)
-    end
+    profile_strategy(opts).emit_metrics(adapter, operation, labels, status, opts)
   end
 
   defp adapter(opts) do
     Keyword.get(opts, :adapter, @default_adapter)
+  end
+
+  defp profile_strategy(opts) do
+    case Profile.normalize(Keyword.get(opts, :profile, :high_level)) do
+      :high_level -> HighLevel
+      :granular -> Granular
+      :forensics -> Forensics
+    end
   end
 end

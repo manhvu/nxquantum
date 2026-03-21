@@ -1,6 +1,7 @@
 defmodule NxQuantum.Adapters.Observability.Noop do
   @moduledoc false
 
+  NxQuantum.Ports.ObservabilityEmitter
   @spec reset() :: :ok
   def reset, do: :ok
 

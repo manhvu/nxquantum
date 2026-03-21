@@ -5,7 +5,16 @@ defmodule NxQuantum.Observability.Profile do
 
   @spec normalize(term()) :: :high_level | :granular | :forensics
   def normalize(profile) when profile in @allowed, do: profile
-  def normalize(profile) when is_binary(profile), do: profile |> String.to_atom() |> normalize()
+
+  def normalize(profile) when is_binary(profile) do
+    case String.downcase(profile) do
+      "high_level" -> :high_level
+      "granular" -> :granular
+      "forensics" -> :forensics
+      _ -> :high_level
+    end
+  end
+
   def normalize(_), do: :high_level
 
   @spec enabled?(keyword()) :: boolean()
