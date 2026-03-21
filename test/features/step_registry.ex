@@ -15,7 +15,18 @@ defmodule NxQuantum.Features.StepRegistry do
     NxQuantum.Features.Steps.TopologyTranspilationSteps,
     NxQuantum.Features.Steps.DynamicCircuitIrFoundationSteps,
     NxQuantum.Features.Steps.DynamicExecutionHardwareBridgesSteps,
-    NxQuantum.Features.Steps.ScaleAndPerformanceSteps
+    NxQuantum.Features.Steps.ScaleAndPerformanceSteps,
+    NxQuantum.Features.Steps.ProviderCapabilityContractsSteps,
+    NxQuantum.Features.Steps.ProviderIbmRuntimeBridgeSteps,
+    NxQuantum.Features.Steps.ProviderAwsBraketBridgeSteps,
+    NxQuantum.Features.Steps.ProviderAzureQuantumBridgeSteps,
+    NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps,
+    NxQuantum.Features.Steps.ProviderObservabilitySteps,
+    NxQuantum.Features.Steps.ProviderTopologyExecutionPoliciesSteps,
+    NxQuantum.Features.Steps.ProviderDynamicCircuitCapabilitiesSteps,
+    NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps,
+    NxQuantum.Features.Steps.ProviderMitigationCalibrationContractsSteps,
+    NxQuantum.Features.Steps.ProviderSimulationStrategyFallbackSteps
   ]
 
   @feature_to_module Map.new(@step_modules, &{&1.feature(), &1})
