@@ -116,4 +116,21 @@ defmodule NxQuantum.StateVectorTest do
     assert_in_delta Nx.to_number(Nx.real(coefficients.g10)), :math.sin(0.15), 1.0e-7
     assert_in_delta Nx.to_number(Nx.real(coefficients.g11)), :math.cos(0.15), 1.0e-7
   end
+
+  test "compiled execution plan cache is deterministic" do
+    operations = [
+      GateOperation.new(:h, [0]),
+      GateOperation.new(:ry, [1], theta: 0.3),
+      GateOperation.new(:cnot, [0, 1])
+    ]
+
+    plan = Matrices.compiled_execution_plan(operations, 2)
+    plan_again = Matrices.compiled_execution_plan(operations, 2)
+
+    assert plan == plan_again
+    assert length(plan) == 3
+    assert {:single_qubit, 0, _gate0, _coeff0} = Enum.at(plan, 0)
+    assert {:single_qubit, 1, _gate1, _coeff1} = Enum.at(plan, 1)
+    assert {:cnot, _perm} = Enum.at(plan, 2)
+  end
 end

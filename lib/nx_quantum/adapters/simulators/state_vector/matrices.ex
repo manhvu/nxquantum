@@ -147,6 +147,23 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.Matrices do
     raise ArgumentError, "unsupported single-qubit gate coefficients #{inspect(name)}"
   end
 
+  @type compiled_operation ::
+          {:single_qubit, non_neg_integer(), Nx.Tensor.t(), single_qubit_gate_coefficients()}
+          | {:cnot, Nx.Tensor.t()}
+          | {:dense, Nx.Tensor.t()}
+
+  @spec compiled_execution_plan([GateOperation.t()], pos_integer()) :: [compiled_operation()]
+  def compiled_execution_plan(operations, qubits) when is_list(operations) do
+    cache_key =
+      operations
+      |> execution_plan_key()
+      |> then(&{:execution_plan, qubits, &1})
+
+    cached_matrix(cache_key, fn ->
+      Enum.map(operations, &compile_operation(&1, qubits))
+    end)
+  end
+
   @spec cnot_permutation(non_neg_integer(), non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
   def cnot_permutation(control, target, qubits) do
     cached_matrix({:gate, :cnot, :permutation, control, target, qubits}, fn ->
@@ -314,6 +331,45 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.Matrices do
       g11: matrix |> Nx.slice([1, 1], [1, 1]) |> Nx.reshape({})
     }
   end
+
+  defp compile_operation(%GateOperation{name: name, wires: [wire]} = op, _qubits)
+       when name in [:h, :x, :y, :z, :rx, :ry, :rz] do
+    {:single_qubit, wire, single_qubit_gate_matrix(op), single_qubit_gate_coefficients(op)}
+  end
+
+  defp compile_operation(%GateOperation{name: :cnot, wires: [control, target]}, qubits) do
+    {:cnot, cnot_permutation(control, target, qubits)}
+  end
+
+  defp compile_operation(%GateOperation{} = op, qubits) do
+    {:dense, gate_matrix(op, qubits)}
+  end
+
+  defp execution_plan_key(operations) do
+    Enum.map(operations, &operation_key/1)
+  end
+
+  defp operation_key(%GateOperation{name: name, wires: wires, params: params}) do
+    {name, wires, params_key(params)}
+  end
+
+  defp params_key(params) when map_size(params) == 0, do: []
+
+  defp params_key(params) do
+    params
+    |> Enum.sort_by(fn {key, _value} -> key end)
+    |> Enum.map(fn {key, value} -> {key, param_value_key(value)} end)
+  end
+
+  defp param_value_key(%Nx.Tensor{} = tensor) do
+    if Nx.shape(tensor) == {} do
+      Nx.to_number(tensor)
+    else
+      :erlang.phash2(Nx.to_flat_list(tensor))
+    end
+  end
+
+  defp param_value_key(value), do: value
 
   defp cached_matrix(key, builder_fun) when is_function(builder_fun, 0) do
     table = ensure_cache_table()
