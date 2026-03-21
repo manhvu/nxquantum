@@ -2,6 +2,7 @@ defmodule NxQuantum.ProviderBridge do
   @moduledoc """
   Provider lifecycle facade with typed deterministic error mapping.
   """
+  alias NxQuantum.Observability
   alias NxQuantum.ProviderBridge.Errors
   alias NxQuantum.Providers.Capabilities
 
@@ -29,31 +30,40 @@ defmodule NxQuantum.ProviderBridge do
 
   @spec run_lifecycle(module(), map(), keyword()) :: {:ok, map()} | {:error, map()}
   def run_lifecycle(provider_adapter, payload, opts \\ []) do
-    with {:ok, submitted} <- submit_job(provider_adapter, payload, opts),
-         {:ok, polled} <- poll_job(provider_adapter, submitted, opts),
-         {:ok, result} <- fetch_result(provider_adapter, polled, opts) do
-      {:ok, %{submitted: submitted, polled: polled, result: result}}
-    end
+    provider = provider_id(provider_adapter)
+    target = Keyword.get(opts, :target, "unknown_target")
+    workflow = Map.get(payload, :workflow, :unknown_workflow)
+
+    Observability.trace_workflow(provider, target, workflow, observability_opts(opts), fn ->
+      with {:ok, submitted} <- submit_job(provider_adapter, payload, opts),
+           {:ok, polled} <- poll_job(provider_adapter, submitted, opts),
+           {:ok, result} <- fetch_result(provider_adapter, polled, opts) do
+        {:ok, %{submitted: submitted, polled: polled, result: result}}
+      end
+    end)
   end
 
   defp provider_call(provider_adapter, fun, args, operation) do
     provider_id = provider_id(provider_adapter)
+    {target, workflow, obs_opts} = operation_context(operation, args)
 
-    try do
-      case apply(provider_adapter, fun, args) do
-        {:ok, value} ->
-          {:ok, value}
+    Observability.trace_lifecycle(operation, provider_id, target, workflow, obs_opts, fn ->
+      try do
+        case apply(provider_adapter, fun, args) do
+          {:ok, value} ->
+            {:ok, value}
 
-        {:error, reason} ->
-          {:error, map_error(reason, operation, provider_id)}
+          {:error, reason} ->
+            {:error, map_error(reason, operation, provider_id)}
 
-        unexpected ->
-          {:error, Errors.invalid_response(operation, provider_id, unexpected)}
+          unexpected ->
+            {:error, Errors.invalid_response(operation, provider_id, unexpected)}
+        end
+      rescue
+        error ->
+          {:error, Errors.transport_error(operation, provider_id, Exception.message(error))}
       end
-    rescue
-      error ->
-        {:error, Errors.transport_error(operation, provider_id, Exception.message(error))}
-    end
+    end)
   end
 
   defp provider_id(provider_adapter) do
@@ -129,5 +139,31 @@ defmodule NxQuantum.ProviderBridge do
       batch: Map.get(payload, :batch, Keyword.get(opts, :batch, false)),
       calibration_payload: Map.get(payload, :calibration_payload, Keyword.get(opts, :calibration_payload))
     }
+  end
+
+  defp operation_context(:submit, [payload, opts]) do
+    {
+      Keyword.get(opts, :target, "unknown_target"),
+      Map.get(payload, :workflow, :unknown_workflow),
+      observability_opts(opts)
+    }
+  end
+
+  defp operation_context(_operation, [job, opts]) when is_map(job) and is_list(opts) do
+    {
+      Map.get(job, :target, Keyword.get(opts, :target, "unknown_target")),
+      workflow_from_job(job),
+      observability_opts(opts)
+    }
+  end
+
+  defp operation_context(_operation, _args), do: {"unknown_target", :unknown_workflow, []}
+
+  defp workflow_from_job(job) do
+    get_in(job, [:metadata, :workflow]) || :unknown_workflow
+  end
+
+  defp observability_opts(opts) do
+    Keyword.get(opts, :observability, [])
   end
 end

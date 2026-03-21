@@ -49,7 +49,7 @@ defmodule NxQuantum.Kernels do
   defp phase_offsets(feature_count, nil), do: Nx.broadcast(Nx.tensor(0.0), {1, feature_count})
 
   defp phase_offsets(feature_count, seed) when is_integer(seed) do
-    :rand.seed(:exsplus, seed_tuple(seed))
+    _ = :rand.seed(:exsplus, seed_tuple(seed))
 
     values =
       Enum.map(1..feature_count, fn _ ->

@@ -1,7 +1,8 @@
 defmodule NxQuantum.Application.DynamicIR.Interpreter do
   @moduledoc false
 
-  @spec execute(%{nodes: [map()]}, keyword()) :: {:ok, map()} | {:error, map()}
+  @spec execute(%{required(:nodes) => [map()], optional(atom()) => term()}, term()) ::
+          {:ok, map()} | {:error, map()}
   def execute(validated_ir, opts \\ []) do
     seed = Keyword.get(opts, :seed, 0)
 

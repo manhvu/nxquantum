@@ -171,6 +171,9 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/provider_capability_contracts.feature`
   - `features/provider_ibm_runtime_bridge.feature`
   - `features/provider_aws_braket_bridge.feature`
+  - `features/provider_azure_quantum_bridge.feature`
+  - `features/provider_cross_platform_rollout.feature`
+  - `features/provider_observability.feature`
 - Planned public entrypoints:
   - dynamic execution entrypoint over `NxQuantum.DynamicIR`
   - provider lifecycle orchestration through `NxQuantum.ProviderBridge`
@@ -183,11 +186,20 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
 - Adapter modules:
   - `NxQuantum.Adapters.Providers.IBMRuntime`
   - `NxQuantum.Adapters.Providers.AwsBraket`
+  - `NxQuantum.Adapters.Providers.AzureQuantum`
   - `NxQuantum.Adapters.Providers.Common.StateMapper`
+  - `NxQuantum.Adapters.Observability.OpenTelemetry`
+  - `NxQuantum.Adapters.Observability.Noop`
+- Observability modules:
+  - `NxQuantum.Observability`
+  - `NxQuantum.Observability.Profile`
+  - `NxQuantum.Observability.Fingerprint`
+  - `NxQuantum.Observability.PortabilityDelta`
 - Invariants:
   - deterministic dynamic branch execution for supported subset
   - typed provider lifecycle and capability/error diagnostics
   - deterministic unsupported-capability preflight (no silent provider fallback)
+  - profile-driven telemetry depth with deterministic schema fields
 
 ### 11) Scale and Performance Context (Planned v0.4)
 

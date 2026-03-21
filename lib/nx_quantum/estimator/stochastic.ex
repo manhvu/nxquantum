@@ -40,7 +40,8 @@ defmodule NxQuantum.Estimator.Stochastic do
     a = rem(:erlang.phash2({seed, :a}), 30_000) + 1
     b = rem(:erlang.phash2({seed, :b}), 30_000) + 1
     c = rem(:erlang.phash2({seed, :c}), 30_000) + 1
-    :rand.seed(:exsplus, {a, b, c})
+    _ = :rand.seed(:exsplus, {a, b, c})
+    :ok
   end
 
   defp clamp(v) when v > 1.0, do: 1.0

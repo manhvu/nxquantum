@@ -13,7 +13,7 @@ defmodule NxQuantum.DynamicIR do
   def validate(ir), do: Validator.validate(ir)
 
   @spec execute(t(), keyword()) :: {:ok, map()} | {:error, map()}
-  def execute(ir, opts \\ []) do
+  def execute(ir, opts \\ []) when is_list(opts) do
     case Keyword.get(opts, :mode, :v0_3_boundary) do
       :v0_3_boundary ->
         {:error,

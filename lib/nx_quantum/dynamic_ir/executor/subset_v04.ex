@@ -5,7 +5,7 @@ defmodule NxQuantum.DynamicIR.Executor.SubsetV04 do
   alias NxQuantum.DynamicIR.Validator
 
   @spec execute(Validator.t(), keyword()) :: {:ok, map()} | {:error, map()}
-  def execute(ir, opts \\ []) do
+  def execute(ir, opts \\ []) when is_list(opts) do
     with {:ok, validated} <- Validator.validate(ir) do
       Interpreter.execute(validated, opts)
     end

@@ -20,7 +20,8 @@ defmodule NxQuantum.Sampler.Engine do
     a = rem(:erlang.phash2({seed, :sampler_a}), 30_000) + 1
     b = rem(:erlang.phash2({seed, :sampler_b}), 30_000) + 1
     c = rem(:erlang.phash2({seed, :sampler_c}), 30_000) + 1
-    :rand.seed(:exsplus, {a, b, c})
+    _ = :rand.seed(:exsplus, {a, b, c})
+    :ok
   end
 
   defp clamp_probability(value) when value < 0.0, do: 0.0

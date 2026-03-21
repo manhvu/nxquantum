@@ -159,13 +159,13 @@ Milestone I review gate (before Phase 10):
 
 ## Phase 10 - v0.5 P1: Azure Quantum + Cross-Provider Normalization
 
-- [ ] Implement `NxQuantum.Adapters.Providers.AzureQuantum` behind `NxQuantum.Ports.Provider`.
-- [ ] Normalize target-selection and capability-discovery contract across IBM/AWS/Azure.
-- [ ] Add provider-specific cancellation/terminal-state policy handling with explicit metadata.
-- [ ] Normalize calibration/result payload ingestion envelopes across top-3 providers.
-- [ ] Add cross-provider contract scenarios for typed lifecycle equivalence and portability boundaries.
-- [ ] Implement OpenTelemetry observability profile support (`high_level`, `granular`, `forensics`) for provider lifecycle traces, logs, and metrics.
-- [ ] Add deterministic experiment fingerprint and portability-delta telemetry contracts for cross-provider comparability.
+- [x] Implement `NxQuantum.Adapters.Providers.AzureQuantum` behind `NxQuantum.Ports.Provider`.
+- [x] Normalize target-selection and capability-discovery contract across IBM/AWS/Azure.
+- [x] Add provider-specific cancellation/terminal-state policy handling with explicit metadata.
+- [x] Normalize calibration/result payload ingestion envelopes across top-3 providers.
+- [x] Add cross-provider contract scenarios for typed lifecycle equivalence and portability boundaries.
+- [x] Implement OpenTelemetry observability profile support (`high_level`, `granular`, `forensics`) for provider lifecycle traces, logs, and metrics.
+- [x] Add deterministic experiment fingerprint and portability-delta telemetry contracts for cross-provider comparability.
 
 Milestone J review gate (before Phase 11):
 
