@@ -37,15 +37,16 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
          {:ok, raw_state} <- raw_state(:submit, opts),
          {:ok, state, metadata} <-
            StateMapper.map(:submit, provider_id(), @submit_states, raw_state, target(opts), %{
-             workflow: Map.get(payload, :workflow)
+             workflow: Map.get(payload, :workflow),
+             shots: Map.get(payload, :shots, 1024)
            }) do
       {:ok,
        %{
-         id: job_id(opts),
+         id: job_id(payload, opts),
          state: state,
          provider: provider_id(),
          target: target(opts),
-         submitted_at: "2026-03-20T00:00:00Z",
+         submitted_at: submitted_at(opts),
          metadata:
            Map.merge(metadata, %{
              provider_payload_version: "azure.v1",
@@ -141,7 +142,14 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
   defp default_raw_state(:cancel), do: "CANCELLED"
 
   defp default_payload(job) do
-    %{workflow: "sampler", counts: %{"00" => 400, "11" => 624}, metadata: %{job_id: job.id, source: "fixture"}}
+    shots = get_in(job, [:metadata, :shots]) || 1024
+    zero_count = div(shots, 2)
+
+    %{
+      workflow: "sampler",
+      counts: %{"00" => zero_count, "11" => shots - zero_count},
+      metadata: %{job_id: job.id, source: "fixture", shots: shots}
+    }
   end
 
   defp caveats(opts) do
@@ -151,6 +159,25 @@ defmodule NxQuantum.Adapters.Providers.AzureQuantum do
     end
   end
 
-  defp job_id(opts), do: Keyword.get(opts, :job_id, "azure_job_123")
-  defp target(opts), do: Keyword.get(opts, :target, "azure.quantum.sim")
+  defp submitted_at(opts), do: Keyword.get(opts, :submitted_at)
+
+  defp job_id(payload, opts) do
+    Keyword.get_lazy(opts, :job_id, fn ->
+      digest =
+        :sha256
+        |> :crypto.hash(:erlang.term_to_binary(%{payload: payload, target: target(opts)}))
+        |> Base.encode16(case: :lower)
+        |> binary_part(0, 12)
+
+      "azure_job_#{digest}"
+    end)
+  end
+
+  defp target(opts) do
+    Keyword.get_lazy(opts, :target, fn ->
+      opts
+      |> Keyword.get(:provider_config, %{})
+      |> Map.get(:target_id, "unknown_target")
+    end)
+  end
 end
