@@ -2,6 +2,8 @@
 /cover
 /deps
 /doc
+/.venv
+/.venv-bench
 /.elixir_ls
 /.fetch
 *.ez
