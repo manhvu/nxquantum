@@ -1,7 +1,7 @@
 defmodule NxQuantum.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.5.0"
   @source_url "https://github.com/diogenes/nxquantum"
 
   def project do
@@ -113,6 +113,7 @@ defmodule NxQuantum.MixProject do
       homepage_url: "https://hexdocs.pm/nx_quantum",
       extras: [
         "README.md",
+        "CHANGELOG.md",
         "CONTRIBUTING.md",
         "docs/development-flow.md",
         "docs/backend-support.md",
@@ -165,7 +166,7 @@ defmodule NxQuantum.MixProject do
   defp package do
     [
       name: "nx_quantum",
-      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"],
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
