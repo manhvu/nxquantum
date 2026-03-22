@@ -146,3 +146,13 @@ When preparing provider release evidence:
 2. Bound worker count with `max_concurrency: System.schedulers_online()` (or lower).
 3. Keep deterministic reproducibility by using fixed `seed` values in sampler workflows.
 4. Use sequential mode (`parallel: false`) for very small batches where task overhead may dominate.
+
+## 11) v0.6 Provider Contract Completion Path
+
+When executing v0.6 provider completion work:
+
+1. Start from `docs/v0.6-acceptance-criteria.md` and `docs/v0.6-feature-to-step-mapping.md`.
+2. Replace scaffold-only step modules with assertion-driven step logic.
+3. Add unit/property tests for deterministic invariants behind each completed provider scenario family.
+4. Keep fixture-first determinism as default and treat live smoke lanes as optional/non-default.
+5. Re-run docs build and feature suite before release evidence updates.

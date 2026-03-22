@@ -133,6 +133,8 @@ defmodule NxQuantum.MixProject do
         "docs/observability-dashboards.md",
         "docs/v0.5-feature-spec.md",
         "docs/v0.6-feature-spec.md",
+        "docs/v0.6-acceptance-criteria.md",
+        "docs/v0.6-feature-to-step-mapping.md",
         "docs/v0.7-feature-spec.md",
         "docs/v0.5-provider-implementation-plan.md",
         "docs/v0.5-acceptance-criteria.md",

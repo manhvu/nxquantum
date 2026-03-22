@@ -214,6 +214,9 @@ Milestone K review gate (v0.5 readiness):
 - [ ] Align v0.5/v0.6 docs and release evidence status wording for consistency.
 - [ ] Publish v0.6 feature specification:
   - `docs/v0.6-feature-spec.md`
+- [ ] Publish v0.6 acceptance criteria and feature-to-step execution mapping:
+  - `docs/v0.6-acceptance-criteria.md`
+  - `docs/v0.6-feature-to-step-mapping.md`
 
 Milestone L/M/N review gate (v0.6 readiness):
 

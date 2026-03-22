@@ -44,6 +44,12 @@ v0.3 additions should include feature coverage for:
 - deterministic transpilation report fields (`routed_edges`, `logical_to_physical_map`, `topology_id`),
 - dynamic-circuit IR validation and explicit execution boundary errors.
 
+v0.6 additions should include feature coverage for:
+
+- completion of currently scaffold-only provider scenario families (`dynamic capabilities`, `mitigation calibration contracts`, `topology execution policies`, `simulation strategy fallback`, `batched primitives performance`),
+- deterministic fixture behavior preservation while adapter transport seams are hardened,
+- typed failure behavior for malformed/unsupported provider response paths after seam refactors.
+
 ## Contract Tests
 
 Add explicit contract tests for public APIs to prevent behavior drift:
