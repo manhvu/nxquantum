@@ -8,6 +8,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
 
   @behaviour NxQuantum.Ports.Simulator
 
+  alias NxQuantum.Adapters.Simulators.StateVector.EvolutionStrategy
   alias NxQuantum.Adapters.Simulators.StateVector.Matrices
   alias NxQuantum.Adapters.Simulators.StateVector.State
   alias NxQuantum.Circuit
@@ -23,7 +24,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
 
   def expectation(%Circuit{} = circuit, _opts) do
     %{observable: observable, wire: wire} = circuit.measurement
-    state = evolve_state(circuit, observable)
+    state = EvolutionStrategy.evolve(circuit)
     value = expectation_for_observable(state, observable, wire, circuit.qubits)
     Nx.as_type(value, {:f, 32})
   end
@@ -39,23 +40,5 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
   defp expectation_for_observable(state, observable, wire, qubits) do
     observable_matrix = Matrices.observable_matrix(observable, wire, qubits)
     State.expectation_from_state(state, observable_matrix)
-  end
-
-  defp evolve_state(%Circuit{} = circuit, :pauli_z) do
-    if State.real_path_eligible?(circuit.operations) do
-      circuit.qubits
-      |> State.initial_state_real()
-      |> State.apply_operations_real(circuit.operations)
-    else
-      circuit.qubits
-      |> State.initial_state()
-      |> State.apply_operations(circuit.operations)
-    end
-  end
-
-  defp evolve_state(%Circuit{} = circuit, _observable) do
-    circuit.qubits
-    |> State.initial_state()
-    |> State.apply_operations(circuit.operations)
   end
 end

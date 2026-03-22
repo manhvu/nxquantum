@@ -1,6 +1,9 @@
 defmodule NxQuantum.StateVectorTest do
   use ExUnit.Case, async: true
 
+  alias NxQuantum.Adapters.Simulators.StateVector.EvolutionStrategy
+  alias NxQuantum.Adapters.Simulators.StateVector.EvolutionStrategy.Complex
+  alias NxQuantum.Adapters.Simulators.StateVector.EvolutionStrategy.RealPauliZ
   alias NxQuantum.Adapters.Simulators.StateVector.Matrices
   alias NxQuantum.Adapters.Simulators.StateVector.Operations.Cnot
   alias NxQuantum.Adapters.Simulators.StateVector.Operations.SingleQubit
@@ -8,6 +11,7 @@ defmodule NxQuantum.StateVectorTest do
   alias NxQuantum.Circuit
   alias NxQuantum.GateOperation
   alias NxQuantum.Gates
+  alias NxQuantum.Observables.Schema
 
   test "expectation of |0> on Pauli-Z is 1" do
     expectation =
@@ -201,5 +205,32 @@ defmodule NxQuantum.StateVectorTest do
     fused_state = Nx.take(state, fused_permutation)
 
     assert Nx.to_flat_list(sequential_state) == Nx.to_flat_list(fused_state)
+  end
+
+  test "evolution strategy selects real path for pauli-z and real-only gates" do
+    {:ok, measurement} = Schema.measurement(:pauli_z, 5, 6)
+
+    measured_circuit =
+      [qubits: 6]
+      |> Circuit.new()
+      |> Gates.h(0)
+      |> Gates.cnot(control: 0, target: 1)
+      |> Gates.ry(5, theta: 0.66)
+      |> Map.put(:measurement, measurement)
+
+    assert EvolutionStrategy.select(measured_circuit) == RealPauliZ
+  end
+
+  test "evolution strategy falls back to complex path for non-pauli-z observable" do
+    {:ok, measurement} = Schema.measurement(:pauli_x, 1, 2)
+
+    measured_circuit =
+      [qubits: 2]
+      |> Circuit.new()
+      |> Gates.h(0)
+      |> Gates.cnot(control: 0, target: 1)
+      |> Map.put(:measurement, measurement)
+
+    assert EvolutionStrategy.select(measured_circuit) == Complex
   end
 end
