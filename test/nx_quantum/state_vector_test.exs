@@ -128,11 +128,13 @@ defmodule NxQuantum.StateVectorTest do
 
     plan = Matrices.compiled_execution_plan(operations, 2)
     plan_again = Matrices.compiled_execution_plan(operations, 2)
+    layout_wire_0 = Matrices.single_qubit_layout_plan(0, 2)
+    layout_wire_1 = Matrices.single_qubit_layout_plan(1, 2)
 
     assert plan == plan_again
     assert length(plan) == 3
-    assert %SingleQubit{wire: 0} = Enum.at(plan, 0)
-    assert %SingleQubit{wire: 1} = Enum.at(plan, 1)
+    assert %SingleQubit{wire: 0, layout: ^layout_wire_0} = Enum.at(plan, 0)
+    assert %SingleQubit{wire: 1, layout: ^layout_wire_1} = Enum.at(plan, 1)
     assert %Cnot{} = Enum.at(plan, 2)
   end
 

@@ -12,18 +12,30 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.CompiledPlan do
   @spec compiled_execution_plan([GateOperation.t()], pos_integer()) :: [struct()]
   def compiled_execution_plan(operations, qubits) when is_list(operations) do
     cache_key = {:execution_plan, qubits, KeyEncoder.execution_plan_key(operations)}
+    process_key = {__MODULE__, cache_key}
 
-    Cache.fetch(cache_key, fn ->
-      build_compiled_plan(operations, qubits)
-    end)
+    case Process.get(process_key) do
+      nil ->
+        plan =
+          Cache.fetch(cache_key, fn ->
+            build_compiled_plan(operations, qubits)
+          end)
+
+        Process.put(process_key, plan)
+        plan
+
+      plan ->
+        plan
+    end
   end
 
-  defp compile_operation(%GateOperation{name: name, wires: [wire]} = op, _qubits)
+  defp compile_operation(%GateOperation{name: name, wires: [wire]} = op, qubits)
        when name in [:h, :x, :y, :z, :rx, :ry, :rz] do
     %SingleQubit{
       wire: wire,
       gate_matrix: MatrixLibrary.single_qubit_gate_matrix(op),
-      gate_coefficients: MatrixLibrary.single_qubit_gate_coefficients(op)
+      gate_coefficients: MatrixLibrary.single_qubit_gate_coefficients(op),
+      layout: MatrixLibrary.single_qubit_layout_plan(wire, qubits)
     }
   end
 

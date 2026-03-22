@@ -45,7 +45,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.State do
     if qubits <= 2 do
       apply_single_qubit_gate_small(op.gate_matrix, state, op.wire, qubits)
     else
-      apply_single_qubit_gate_pairwise(op.gate_coefficients, state, op.wire, qubits)
+      apply_single_qubit_gate_pairwise(op.gate_coefficients, op.layout, state)
     end
   end
 
@@ -74,8 +74,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.State do
     |> Nx.reshape(Nx.shape(state))
   end
 
-  defp apply_single_qubit_gate_pairwise(gate_coefficients, state, wire, qubits) do
-    layout = Matrices.single_qubit_layout_plan(wire, qubits)
+  defp apply_single_qubit_gate_pairwise(gate_coefficients, layout, state) do
     reshaped = Nx.reshape(state, layout.pair_shape)
     %{g00: g00, g01: g01, g10: g10, g11: g11} = gate_coefficients
 
