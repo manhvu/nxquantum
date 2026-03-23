@@ -5,10 +5,10 @@ defmodule NxQuantum.Transpiler do
   Public contract remains stable while internal responsibilities are split into
   focused modules:
 
-  - `NxQuantum.Transpiler.Topology`
-  - `NxQuantum.Transpiler.Router`
-  - `NxQuantum.Transpiler.SwapInsertion`
-  - `NxQuantum.Transpiler.Report`
+  - NxQuantum.Transpiler.Topology
+  - NxQuantum.Transpiler.Router
+  - NxQuantum.Transpiler.SwapInsertion
+  - NxQuantum.Transpiler.Report
   """
 
   alias NxQuantum.Circuit

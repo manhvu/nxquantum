@@ -15,7 +15,9 @@ defmodule NxQuantum.Runtime do
           :cpu_portable | :cpu_compiled | :nvidia_gpu_compiled | :torch_interop_runtime
   @type support_tier :: :p0 | :p1
   @type fallback_policy :: :strict | :allow_cpu_compiled
-  @type scale_strategy :: Scale.strategy()
+  @type scale_strategy :: :auto | :dense_only | :large_scale_preferred
+  @type simulation_path :: :dense_state_vector | :tensor_network_fallback
+  @type simulation_decision :: %{selected_path: simulation_path(), report: map()}
 
   @type profile :: %{
           id: profile_id(),
@@ -74,7 +76,7 @@ defmodule NxQuantum.Runtime do
   end
 
   @spec select_simulation_strategy(scale_strategy(), non_neg_integer(), keyword()) ::
-          {:ok, NxQuantum.Runtime.Scale.Decision.t()} | {:error, map()}
+          {:ok, simulation_decision()} | {:error, map()}
   def select_simulation_strategy(strategy, qubit_count, opts \\ []) do
     Scale.select(strategy, qubit_count, opts)
   end

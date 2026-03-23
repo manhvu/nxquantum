@@ -56,9 +56,9 @@ To keep operations and research reproducibility strong, we need:
 
 ### Adapter Layer
 
-1. `NxQuantum.Adapters.Observability.OpenTelemetry`:
+1. NxQuantum.Adapters.Observability.OpenTelemetry:
    - production emitter adapter
-2. `NxQuantum.Adapters.Observability.Noop`:
+2. NxQuantum.Adapters.Observability.Noop:
    - deterministic no-op path for disabled observability
 
 ## Standard Span Taxonomy

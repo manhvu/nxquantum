@@ -13,16 +13,16 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/variational_circuit.feature`
   - authoring portions of `features/hybrid_training.feature`
 - Public entrypoints:
-  - `NxQuantum.Circuit`
-  - `NxQuantum.Gates`
+  - NxQuantum.Circuit
+  - NxQuantum.Gates
 - Domain modules:
-  - `NxQuantum.Circuit`
-  - `NxQuantum.Circuit.Validation`
-  - `NxQuantum.Circuit.Error`
-  - `NxQuantum.GateOperation`
-  - `NxQuantum.Observables`
-  - `NxQuantum.Observables.Schema`
-  - `NxQuantum.Observables.Error`
+  - NxQuantum.Circuit
+  - NxQuantum.Circuit.Validation
+  - NxQuantum.Circuit.Error
+  - NxQuantum.GateOperation
+  - NxQuantum.Observables
+  - NxQuantum.Observables.Schema
+  - NxQuantum.Observables.Error
 - Invariants:
   - circuit immutability
   - gate ordering
@@ -33,13 +33,13 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
 - Features:
   - `features/backend_compilation.feature`
 - Public entrypoints:
-  - `NxQuantum.Runtime`
-  - runtime options accepted by `NxQuantum.Estimator` and `NxQuantum.Sampler`
+  - NxQuantum.Runtime
+  - runtime options accepted by NxQuantum.Estimator and NxQuantum.Sampler
 - Domain/application modules:
-  - `NxQuantum.Runtime`
-  - `NxQuantum.Runtime.Catalog`
-  - `NxQuantum.Runtime.Detection`
-  - `NxQuantum.Runtime.Fallback`
+  - NxQuantum.Runtime
+  - NxQuantum.Runtime.Catalog
+  - NxQuantum.Runtime.Detection
+  - NxQuantum.Runtime.Fallback
 - Ports/adapters:
   - backend capability detection delegates to Nx/EXLA/Torchx availability
 - Invariants:
@@ -53,29 +53,29 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/noise_and_shots.feature`
   - estimator portions of `features/batched_pqc.feature`
 - Public entrypoints:
-  - `NxQuantum.Estimator`
+  - NxQuantum.Estimator
   - `Circuit.expectation/2`
 - Application services:
-  - `NxQuantum.Application.ExecuteCircuit`
+  - NxQuantum.Application.ExecuteCircuit
 - Domain modules:
-  - `NxQuantum.Estimator.Batch`
-  - `NxQuantum.Estimator.Batch.Strategy`
-  - `NxQuantum.Estimator.Batch.Strategies.Deterministic`
-  - `NxQuantum.Estimator.Batch.Strategies.ScalarFallback`
-  - `NxQuantum.Estimator.ExecutionMode`
-  - `NxQuantum.Estimator.ResultBuilder`
-  - `NxQuantum.Estimator.RuntimeProfile`
-  - `NxQuantum.Estimator.SampledExpval`
-  - `NxQuantum.Estimator.Scalar`
-  - `NxQuantum.Estimator.ObservableSpecs`
-  - `NxQuantum.Estimator.Measurement`
-  - `NxQuantum.Estimator.Stochastic`
-  - `NxQuantum.Observables.SparsePauli`
+  - NxQuantum.Estimator.Batch
+  - NxQuantum.Estimator.Batch.Strategy
+  - NxQuantum.Estimator.Batch.Strategies.Deterministic
+  - NxQuantum.Estimator.Batch.Strategies.ScalarFallback
+  - NxQuantum.Estimator.ExecutionMode
+  - NxQuantum.Estimator.ResultBuilder
+  - NxQuantum.Estimator.RuntimeProfile
+  - NxQuantum.Estimator.SampledExpval
+  - NxQuantum.Estimator.Scalar
+  - NxQuantum.Estimator.ObservableSpecs
+  - NxQuantum.Estimator.Measurement
+  - NxQuantum.Estimator.Stochastic
+  - NxQuantum.Observables.SparsePauli
 - Ports/adapters:
-  - `NxQuantum.Ports.Simulator`
-  - `NxQuantum.Adapters.Simulators.StateVector`
-  - `NxQuantum.Adapters.Simulators.StateVector.State`
-  - `NxQuantum.Adapters.Simulators.StateVector.Matrices`
+  - NxQuantum.Ports.Simulator
+  - NxQuantum.Adapters.Simulators.StateVector
+  - NxQuantum.Adapters.Simulators.StateVector.State
+  - NxQuantum.Adapters.Simulators.StateVector.Matrices
 - Invariants:
   - deterministic seeded estimation
   - stable observable ordering and typed errors
@@ -87,23 +87,23 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/error_mitigation.feature`
   - sampler portions of `features/batched_pqc.feature`
 - Public entrypoints:
-  - `NxQuantum.Sampler`
-  - `NxQuantum.Mitigation`
+  - NxQuantum.Sampler
+  - NxQuantum.Mitigation
 - Domain modules:
-  - `NxQuantum.Sampler.Result`
-  - `NxQuantum.Sampler.Options`
-  - `NxQuantum.Sampler.Engine`
-  - `NxQuantum.Sampler.ResultBuilder`
-  - `NxQuantum.Sampler.ExecutionMode`
-  - `NxQuantum.Sampler.BatchedRunner`
-  - `NxQuantum.Sampler.Batch.Strategy`
-  - `NxQuantum.Sampler.Batch.Strategies.Sequential`
-  - `NxQuantum.Sampler.Batch.Strategies.Parallel`
+  - NxQuantum.Sampler.Result
+  - NxQuantum.Sampler.Options
+  - NxQuantum.Sampler.Engine
+  - NxQuantum.Sampler.ResultBuilder
+  - NxQuantum.Sampler.ExecutionMode
+  - NxQuantum.Sampler.BatchedRunner
+  - NxQuantum.Sampler.Batch.Strategy
+  - NxQuantum.Sampler.Batch.Strategies.Sequential
+  - NxQuantum.Sampler.Batch.Strategies.Parallel
   - mitigation pipeline pass contracts
-  - `NxQuantum.Mitigation.PassPipeline`
-  - `NxQuantum.Mitigation.Passes.Readout`
-  - `NxQuantum.Mitigation.Passes.ZneLinear`
-  - `NxQuantum.Mitigation.Trace`
+  - NxQuantum.Mitigation.PassPipeline
+  - NxQuantum.Mitigation.Passes.Readout
+  - NxQuantum.Mitigation.Passes.ZneLinear
+  - NxQuantum.Mitigation.Trace
 - Invariants:
   - deterministic counts/probabilities for fixed seed
   - explicit mitigation pass ordering and typed mitigation errors
@@ -114,11 +114,11 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/differentiation_modes.feature`
   - gradient portions of `features/hybrid_training.feature`
 - Public entrypoints:
-  - `NxQuantum.Grad`
+  - NxQuantum.Grad
 - Domain modules:
-  - `NxQuantum.Grad.Numeric` (`:backprop`, `:parameter_shift`)
-  - `NxQuantum.Grad.Adjoint`
-  - `NxQuantum.Grad.Error`
+  - NxQuantum.Grad.Numeric (`:backprop`, `:parameter_shift`)
+  - NxQuantum.Grad.Adjoint
+  - NxQuantum.Grad.Error
 - Invariants:
   - typed mode/contract errors
   - deterministic gradients for fixed inputs
@@ -128,14 +128,14 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
 - Features:
   - `features/circuit_optimization.feature`
 - Public entrypoints:
-  - `NxQuantum.Compiler`
+  - NxQuantum.Compiler
 - Domain modules:
-  - `NxQuantum.Compiler.PassPipeline`
-  - `NxQuantum.Compiler.Passes.Simplify`
-  - `NxQuantum.Compiler.Passes.Fuse`
-  - `NxQuantum.Compiler.Passes.Cancel`
-  - `NxQuantum.Compiler.Passes.Resynthesize1Q`
-  - `NxQuantum.Compiler.Theta`
+  - NxQuantum.Compiler.PassPipeline
+  - NxQuantum.Compiler.Passes.Simplify
+  - NxQuantum.Compiler.Passes.Fuse
+  - NxQuantum.Compiler.Passes.Cancel
+  - NxQuantum.Compiler.Passes.Resynthesize1Q
+  - NxQuantum.Compiler.Theta
 - Invariants:
   - semantic equivalence under optimization
   - explicit before/after report contracts
@@ -145,12 +145,12 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
 - Features:
   - `features/topology_transpilation.feature`
 - Public entrypoints:
-  - `NxQuantum.Transpiler`
+  - NxQuantum.Transpiler
 - Domain/application modules:
-  - `NxQuantum.Transpiler.Topology`
-  - `NxQuantum.Transpiler.Router`
-  - `NxQuantum.Transpiler.SwapInsertion`
-  - `NxQuantum.Transpiler.Report`
+  - NxQuantum.Transpiler.Topology
+  - NxQuantum.Transpiler.Router
+  - NxQuantum.Transpiler.SwapInsertion
+  - NxQuantum.Transpiler.Report
 - Invariants:
   - strict-mode typed violations
   - deterministic shortest-path and tie-break behavior
@@ -160,7 +160,7 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
 - Features:
   - `features/quantum_kernel_methods.feature`
 - Public entrypoints:
-  - `NxQuantum.Kernels`
+  - NxQuantum.Kernels
 - Domain modules:
   - deterministic kernel matrix generation
 - Invariants:
@@ -189,42 +189,42 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/provider_cross_platform_rollout.feature`
   - `features/provider_observability.feature`
 - Planned public entrypoints:
-  - dynamic execution entrypoint over `NxQuantum.DynamicIR`
-  - provider lifecycle orchestration through `NxQuantum.ProviderBridge`
+  - dynamic execution entrypoint over NxQuantum.DynamicIR
+  - provider lifecycle orchestration through NxQuantum.ProviderBridge
 - Domain/application modules:
   - dynamic execution interpreter (supported subset)
-  - provider lifecycle facade (`NxQuantum.ProviderBridge`) delegating to:
-    - `NxQuantum.Application.ProviderLifecycle.Runner`
-    - `NxQuantum.Application.ProviderLifecycle.Dispatcher`
-    - `NxQuantum.Application.ProviderLifecycle.Preflight`
-    - `NxQuantum.Application.ProviderLifecycle.ErrorMapper`
-    - `NxQuantum.Application.ProviderLifecycle.Commands.*`
+  - provider lifecycle facade (NxQuantum.ProviderBridge) delegating to:
+    - NxQuantum.Application.ProviderLifecycle.Runner
+    - NxQuantum.Application.ProviderLifecycle.Dispatcher
+    - NxQuantum.Application.ProviderLifecycle.Preflight
+    - NxQuantum.Application.ProviderLifecycle.ErrorMapper
+    - NxQuantum.Application.ProviderLifecycle.Commands.*
   - provider lifecycle contract objects:
-    - `NxQuantum.ProviderBridge.Job`
-    - `NxQuantum.ProviderBridge.Result`
-    - `NxQuantum.ProviderBridge.ProviderError`
-    - `NxQuantum.ProviderBridge.CapabilityContract`
-  - provider lifecycle port contract (`NxQuantum.Ports.Provider`)
-  - capability preflight domain contract (`NxQuantum.Providers.Capabilities`)
-  - provider config/redaction contracts (`NxQuantum.Providers.Config`, `NxQuantum.Providers.Redaction`)
+    - NxQuantum.ProviderBridge.Job
+    - NxQuantum.ProviderBridge.Result
+    - NxQuantum.ProviderBridge.ProviderError
+    - NxQuantum.ProviderBridge.CapabilityContract
+  - provider lifecycle port contract (NxQuantum.Ports.Provider)
+  - capability preflight domain contract (NxQuantum.Providers.Capabilities)
+  - provider config/redaction contracts (NxQuantum.Providers.Config, NxQuantum.Providers.Redaction)
   - calibration payload validation contracts
 - Adapter modules:
-  - `NxQuantum.Adapters.Providers.IBMRuntime`
-  - `NxQuantum.Adapters.Providers.AwsBraket`
-  - `NxQuantum.Adapters.Providers.AzureQuantum`
-  - `NxQuantum.Adapters.Providers.Common.LifecycleSupport`
-  - `NxQuantum.Adapters.Providers.Common.StateMapper`
-  - `NxQuantum.Adapters.Observability.OpenTelemetry`
-  - `NxQuantum.Adapters.Observability.Noop`
+  - NxQuantum.Adapters.Providers.IBMRuntime
+  - NxQuantum.Adapters.Providers.AwsBraket
+  - NxQuantum.Adapters.Providers.AzureQuantum
+  - NxQuantum.Adapters.Providers.Common.LifecycleSupport
+  - NxQuantum.Adapters.Providers.Common.StateMapper
+  - NxQuantum.Adapters.Observability.OpenTelemetry
+  - NxQuantum.Adapters.Observability.Noop
 - Observability modules:
-  - `NxQuantum.Observability`
-  - `NxQuantum.Observability.Profile`
-  - `NxQuantum.Observability.ProfileStrategy`
-  - `NxQuantum.Observability.ProfileStrategy.HighLevel`
-  - `NxQuantum.Observability.ProfileStrategy.Granular`
-  - `NxQuantum.Observability.ProfileStrategy.Forensics`
-  - `NxQuantum.Observability.Fingerprint`
-  - `NxQuantum.Observability.PortabilityDelta`
+  - NxQuantum.Observability
+  - NxQuantum.Observability.Profile
+  - NxQuantum.Observability.ProfileStrategy
+  - NxQuantum.Observability.ProfileStrategy.HighLevel
+  - NxQuantum.Observability.ProfileStrategy.Granular
+  - NxQuantum.Observability.ProfileStrategy.Forensics
+  - NxQuantum.Observability.Fingerprint
+  - NxQuantum.Observability.PortabilityDelta
 - Invariants:
   - deterministic dynamic branch execution for supported subset
   - typed provider lifecycle and capability/error diagnostics
@@ -238,14 +238,14 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/primitives_api.feature`
   - `features/quantum_kernel_methods.feature`
 - Application/domain modules:
-  - `NxQuantum.Adapters.Simulators.StateVector.Matrices` (facade)
-  - `NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary`
-  - `NxQuantum.Adapters.Simulators.StateVector.CompiledPlan`
-  - `NxQuantum.Adapters.Simulators.StateVector.Operations`
-  - `NxQuantum.Adapters.Simulators.StateVector.Cache`
-  - `NxQuantum.Adapters.Simulators.StateVector.KeyEncoder`
-  - `NxQuantum.Application.BatchExecutor`
-  - `NxQuantum.Random.Seed`
+  - NxQuantum.Adapters.Simulators.StateVector.Matrices (facade)
+  - NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary
+  - NxQuantum.Adapters.Simulators.StateVector.CompiledPlan
+  - NxQuantum.Adapters.Simulators.StateVector.Operations
+  - NxQuantum.Adapters.Simulators.StateVector.Cache
+  - NxQuantum.Adapters.Simulators.StateVector.KeyEncoder
+  - NxQuantum.Application.BatchExecutor
+  - NxQuantum.Random.Seed
 - Invariants:
   - compiled-plan semantic equivalence with matrix execution
   - deterministic cache behavior under bounded eviction

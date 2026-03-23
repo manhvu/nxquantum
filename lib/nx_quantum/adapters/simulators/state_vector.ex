@@ -3,7 +3,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
   State-vector simulator adapter.
 
   Gate application and expectation primitives delegate to `Nx.Defn` kernels in
-  `NxQuantum.Adapters.Simulators.StateVector.State`.
+  NxQuantum.Adapters.Simulators.StateVector.State.
   """
 
   @behaviour NxQuantum.Ports.Simulator
