@@ -407,7 +407,12 @@ Implementation deliverables:
    - `features/quantum_ai_tool_contracts.feature`
    - `test/features/steps/quantum_ai_tool_contracts_steps.ex`
    - `test/nx_quantum/ai/tool_contract_test.exs`
-5. Publish docs and runnable examples:
+5. Add transport architecture contract for sync and async integration:
+   - `docs/adr/0011-ai-tool-transport-sync-async-contract.md`
+   - `lib/nx_quantum/ports/ai_tool_transport.ex`
+   - `lib/nx_quantum/adapters/ai_tool_transport/mcp_json_rpc_sync.ex`
+   - `lib/nx_quantum/adapters/ai_tool_transport/cloud_events_async.ex`
+6. Publish docs and runnable examples:
    - `docs/v1.0-quantum-ai-tool-contracts.md`
 
 Milestone W review gate (before Phase 20):
@@ -415,7 +420,8 @@ Milestone W review gate (before Phase 20):
 1. AI-tool contract envelopes are additive, versioned, and machine-consumable.
 2. Deterministic fallback behavior is explicit and acceptance-covered.
 3. Integration consumers can parse typed responses without provider-specific coupling.
-4. Docs/examples are executable and aligned with public APIs.
+4. Sync and async transport paths are both defined behind stable ports/adapters.
+5. Docs/examples are executable and aligned with public APIs.
 
 ## Phase 20 - v1.0 P1: Hybrid Quantum AI Evaluation and Benchmark Pack
 

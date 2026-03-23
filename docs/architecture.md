@@ -51,7 +51,18 @@ Behavior ownership is defined by executable features, not by file location alone
   - `cancel/2`
   - `fetch_result/2`
 - NxQuantum.Ports.ObservabilityEmitter
-  - `emit/4`
+  - `reset/0`
+  - `snapshot/0`
+  - `span_start/3`
+  - `span_stop/3`
+  - `metric_emit/6`
+  - `log_emit/2`
+- NxQuantum.Ports.AIToolTransport
+  - `capabilities/1`
+  - `invoke_sync/2`
+  - `publish_async/2`
+  - `fetch_async_result/2`
+  - `cancel_async/2`
 
 ## v0.2 Facade Modules
 

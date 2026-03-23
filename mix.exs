@@ -142,6 +142,10 @@ defmodule NxQuantum.MixProject do
         "docs/v0.7-feature-spec.md",
         "docs/v0.7-acceptance-criteria.md",
         "docs/v0.7-feature-to-step-mapping.md",
+        "docs/v0.8-compiler-implementation-plan.md",
+        "docs/v0.8-compiler-agent-prompts.md",
+        "docs/v1.0-quantum-ai-tool-contracts.md",
+        "docs/quantum-llm-vision.md",
         "docs/v0.5-provider-implementation-plan.md",
         "docs/v0.5-acceptance-criteria.md",
         "docs/v0.5-migration-packs.md",
@@ -157,6 +161,7 @@ defmodule NxQuantum.MixProject do
         "docs/roadmap.md",
         "docs/adr/0001-hexagonal-ddd-foundation.md",
         "docs/adr/0007-migration-assurance-toolkit.md",
+        "docs/adr/0011-ai-tool-transport-sync-async-contract.md",
         "AGENTS.md",
         "SKILLS.md"
       ]

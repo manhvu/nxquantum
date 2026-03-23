@@ -283,6 +283,28 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - claims backed by reproducible scripts/benchmarks
   - limitations explicitly documented
 
+### 13) Quantum AI Tool Contract Context (Planned v1.0)
+
+- Features:
+  - `features/quantum_ai_tool_contracts.feature`
+  - `features/quantum_ai_rollout_gates.feature`
+- Planned public entrypoints:
+  - `NxQuantum.AI`
+- Domain/application modules:
+  - `NxQuantum.AI`
+  - `NxQuantum.AI.Request`
+  - `NxQuantum.AI.Result`
+  - `NxQuantum.AI.Error`
+  - `NxQuantum.AI.ToolRunner`
+- Ports/adapters:
+  - `NxQuantum.Ports.AIToolTransport`
+  - `NxQuantum.Adapters.AIToolTransport.McpJsonRpcSync`
+  - `NxQuantum.Adapters.AIToolTransport.CloudEventsAsync`
+- Invariants:
+  - canonical tool envelopes stay transport-neutral and versioned
+  - sync and async execution paths preserve typed deterministic errors
+  - trace/correlation metadata remains intact end-to-end
+
 ## Refactor Rules
 
 1. Start from one context and one behavior slice.
