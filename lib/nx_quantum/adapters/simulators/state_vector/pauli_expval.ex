@@ -5,6 +5,8 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
 
   alias NxQuantum.Adapters.Simulators.StateVector.PauliExpval.ExecutionStrategy
   alias NxQuantum.Adapters.Simulators.StateVector.PauliExpval.ExpectationPlan
+  alias NxQuantum.Adapters.Simulators.StateVector.PauliExpval.FusedSingleWire
+  alias NxQuantum.Adapters.Simulators.StateVector.State
 
   @type coefficient :: {number(), number()}
   @type pauli_term :: %{
@@ -65,7 +67,11 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
         |> map_values_to_plan_order(plan.terms)
 
       :scalar ->
-        evaluate_scalar_with_memo(state, plan)
+        if FusedSingleWire.eligible?(plan.terms, plan.qubits) do
+          FusedSingleWire.expectations(state, plan.terms, plan.qubits)
+        else
+          evaluate_scalar_with_memo(state, plan)
+        end
     end
   end
 
@@ -75,17 +81,17 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
   end
 
   defp expectation_with_prepared_term(state, %{kind: :pauli_x, wire: wire, scale: scale}) do
-    value = NxQuantum.Adapters.Simulators.StateVector.State.expectation_pauli_x(state, wire, qubits_from_state(state))
+    value = State.expectation_pauli_x(state, wire, qubits_from_state(state))
     apply_scale(value, scale)
   end
 
   defp expectation_with_prepared_term(state, %{kind: :pauli_y, wire: wire, scale: scale}) do
-    value = NxQuantum.Adapters.Simulators.StateVector.State.expectation_pauli_y(state, wire, qubits_from_state(state))
+    value = State.expectation_pauli_y(state, wire, qubits_from_state(state))
     apply_scale(value, scale)
   end
 
   defp expectation_with_prepared_term(state, %{kind: :pauli_z, wire: wire, scale: scale}) do
-    value = NxQuantum.Adapters.Simulators.StateVector.State.expectation_pauli_z(state, wire, qubits_from_state(state))
+    value = State.expectation_pauli_z(state, wire, qubits_from_state(state))
     apply_scale(value, scale)
   end
 
@@ -141,7 +147,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
 
   defp evaluate_term_with_memo(state, %{kind: :pauli_z, wire: wire, scale: scale}, memo) do
     {probabilities, next_memo} = fetch_or_compute_probabilities(state, memo)
-    value = NxQuantum.Adapters.Simulators.StateVector.State.expectation_pauli_z_from_probabilities(probabilities, wire, memo.qubits)
+    value = State.expectation_pauli_z_from_probabilities(probabilities, wire, memo.qubits)
     {apply_scale(value, scale), next_memo}
   end
 
@@ -155,7 +161,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
         {pair, memo}
 
       :error ->
-        pair = NxQuantum.Adapters.Simulators.StateVector.State.expectation_pauli_xy(state, wire, memo.qubits)
+        pair = State.expectation_pauli_xy(state, wire, memo.qubits)
         {pair, %{memo | xy_values: Map.put(memo.xy_values, wire, pair)}}
     end
   end
@@ -166,7 +172,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
         {probabilities, memo}
 
       nil ->
-        probabilities = NxQuantum.Adapters.Simulators.StateVector.State.probabilities(state)
+        probabilities = State.probabilities(state)
         {probabilities, %{memo | z_probabilities: probabilities}}
     end
   end
