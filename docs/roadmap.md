@@ -202,14 +202,13 @@ Milestone K review gate (v0.5 readiness):
 
 ## Known Gaps (Post-v0.5 Provider Foundation)
 
-1. Five provider scenario families are still scaffold-only at step implementation level and need full executable assertion coverage.
-2. Provider adapters remain fixture-first and require transport seam hardening for optional live smoke lanes while preserving deterministic defaults.
+1. v0.5 post-foundation gaps were addressed in Phase 12 (v0.6) contract completion and adapter hardening.
 
 ## Phase 12 - v0.6: Contract Completion and Adapter Hardening
 
-- [ ] Harden provider adapter transport seams for optional live smoke lanes while preserving fixture-first deterministic defaults.
-- [ ] Convert remaining scaffold-only provider scenario step modules into executable assertion-driven behavior checks.
-- [ ] Add targeted unit/property checks for newly completed provider scenario families.
+- [x] Harden provider adapter transport seams for optional live smoke lanes while preserving fixture-first deterministic defaults.
+- [x] Convert remaining scaffold-only provider scenario step modules into executable assertion-driven behavior checks.
+- [x] Add targeted unit/property checks for newly completed provider scenario families.
 - [x] Align v0.5/v0.6 docs and release evidence status wording for consistency.
 - [x] Publish v0.6 feature specification:
   - `docs/v0.6-feature-spec.md`
@@ -226,13 +225,13 @@ Milestone L/M/N review gate (v0.6 readiness):
 
 ## Phase 13 - v0.7: Standalone Production Hardening + External Operations Interoperability
 
-- [ ] Stabilize external operations integration contracts (capability/lifecycle/error envelope versioning + deterministic serialization).
-- [ ] Harden observability schema governance and adapter strategy across `high_level`, `granular`, and `forensics`.
-- [ ] Publish standalone production and external integration profile guidance with executable examples.
-- [ ] Add release evidence checks for contract stability and schema compatibility.
-- [ ] Publish v0.7 feature specification:
+- [x] Stabilize external operations integration contracts (capability/lifecycle/error envelope versioning + deterministic serialization).
+- [x] Harden observability schema governance and adapter strategy across `high_level`, `granular`, and `forensics`.
+- [x] Publish standalone production and external integration profile guidance with executable examples.
+- [x] Add release evidence checks for contract stability and schema compatibility.
+- [x] Publish v0.7 feature specification:
   - `docs/v0.7-feature-spec.md`
-- [ ] Publish v0.7 acceptance criteria and feature-to-step execution mapping:
+- [x] Publish v0.7 acceptance criteria and feature-to-step execution mapping:
   - `docs/v0.7-acceptance-criteria.md`
   - `docs/v0.7-feature-to-step-mapping.md`
 

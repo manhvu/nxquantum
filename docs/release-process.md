@@ -13,7 +13,8 @@
 3. `mix test.provider_smoke` when optional live smoke lanes are enabled and credentials are available
 4. `mix docs.build`
 5. `mix hex.build`
-6. Update roadmap/spec status and release notes summary.
+6. `mix test.release_evidence`
+7. Update roadmap/spec status and release notes summary.
 
 ## CI Release Automation
 
@@ -60,3 +61,15 @@ Include these references when releasing v0.6 docs/status updates:
 3. `docs/v0.6-feature-to-step-mapping.md`
 4. `docs/roadmap.md`
 5. `docs/testing-strategy.md`
+
+## v0.7 Contract and Schema Evidence Bundle
+
+Include these references when releasing v0.7 standalone + integration profile work:
+
+1. `docs/v0.7-feature-spec.md`
+2. `docs/v0.7-acceptance-criteria.md`
+3. `docs/v0.7-feature-to-step-mapping.md`
+4. `docs/standalone-integration-profiles.md`
+5. `test/nx_quantum/provider_contract_serialization_test.exs`
+6. `test/nx_quantum/observability_test.exs`
+7. `test/nx_quantum/release_evidence_contract_test.exs`

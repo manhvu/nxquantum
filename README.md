@@ -28,6 +28,7 @@ See positioning and comparison details:
 - Use provider-specific migration packs: [docs/v0.5-migration-packs.md](docs/v0.5-migration-packs.md)
 - Start interactive tutorials: [docs/livebook-tutorials.md](docs/livebook-tutorials.md)
 - Check provider support tiers and limits: [docs/v0.5-provider-support-tiers.md](docs/v0.5-provider-support-tiers.md)
+- Use standalone and external integration profiles: [docs/standalone-integration-profiles.md](docs/standalone-integration-profiles.md)
 - Review reproducible provider benchmark matrix: [docs/v0.5-benchmark-matrix.md](docs/v0.5-benchmark-matrix.md)
 - Review Python alternatives benchmark run: [docs/python-alternatives-benchmark-2026-03-21.md](docs/python-alternatives-benchmark-2026-03-21.md)
 - Review benchmark narrative evidence: [docs/case-study-beam-integration.md](docs/case-study-beam-integration.md)
@@ -57,8 +58,7 @@ For full setup and API walkthroughs and usage examples:
 
 ## What Is Still Planned
 
-- v0.6 contract completion and provider adapter hardening.
-- v0.7 standalone production hardening plus external-operations interoperability contracts.
+- v0.8 migration-assurance toolkit scope from ADR 0007 (unscheduled).
 - Additional provider depth and broader provider-native dynamic/non-gate-model paths.
 - More benchmark-backed case studies across real BEAM deployment patterns.
 
@@ -90,6 +90,7 @@ Track status here:
 - [docs/architecture.md](docs/architecture.md)
 - [docs/observability.md](docs/observability.md)
 - [docs/observability-dashboards.md](docs/observability-dashboards.md)
+- [docs/standalone-integration-profiles.md](docs/standalone-integration-profiles.md)
 - [docs/v0.5-feature-spec.md](docs/v0.5-feature-spec.md)
 - [docs/v0.6-feature-spec.md](docs/v0.6-feature-spec.md)
 - [docs/v0.6-acceptance-criteria.md](docs/v0.6-acceptance-criteria.md)

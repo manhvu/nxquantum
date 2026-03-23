@@ -132,6 +132,7 @@ defmodule NxQuantum.MixProject do
         "docs/python-alternatives-benchmark-2026-03-21.md",
         "docs/observability.md",
         "docs/observability-dashboards.md",
+        "docs/standalone-integration-profiles.md",
         "docs/v0.5-feature-spec.md",
         "docs/v0.6-feature-spec.md",
         "docs/v0.6-acceptance-criteria.md",
@@ -194,6 +195,9 @@ defmodule NxQuantum.MixProject do
       "test.provider_smoke": [
         "test test/nx_quantum/providers_capabilities_test.exs test/nx_quantum/provider_adapters_test.exs test/nx_quantum/provider_bridge_test.exs test/nx_quantum/provider_azure_adapter_test.exs test/nx_quantum/observability_test.exs",
         "test test/features/features_test.exs"
+      ],
+      "test.release_evidence": [
+        "test test/nx_quantum/provider_contract_serialization_test.exs test/nx_quantum/observability_test.exs test/nx_quantum/release_evidence_contract_test.exs"
       ],
       "features.sync_glue": ["cmd ./scripts/generate_cucumber_glue.sh"],
       "test.acceptance": ["test test/features/features_test.exs"],
