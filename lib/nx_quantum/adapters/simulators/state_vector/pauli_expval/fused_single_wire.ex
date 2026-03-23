@@ -27,15 +27,22 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval.FusedSingleWire 
     z_by_wire = z_by_wire(amps, qubits, dim)
     {x_by_wire, y_by_wire} = xy_by_wire(amps, qubits, dim)
 
-    Enum.map(terms, fn %{kind: kind, wire: wire, scale: scale} ->
-      base =
-        case kind do
-          :pauli_x -> Map.fetch!(x_by_wire, wire)
-          :pauli_y -> Map.fetch!(y_by_wire, wire)
-          :pauli_z -> Map.fetch!(z_by_wire, wire)
-        end
+    tensor_by_term =
+      Enum.reduce(terms, %{}, fn %{term_key: term_key, kind: kind, wire: wire, scale: scale}, acc ->
+        Map.put_new_lazy(acc, term_key, fn ->
+          base =
+            case kind do
+              :pauli_x -> Map.fetch!(x_by_wire, wire)
+              :pauli_y -> Map.fetch!(y_by_wire, wire)
+              :pauli_z -> Map.fetch!(z_by_wire, wire)
+            end
 
-      Nx.tensor(apply_scale(base, scale), type: {:f, 64})
+          Nx.tensor(apply_scale(base, scale), type: {:f, 64})
+        end)
+      end)
+
+    Enum.map(terms, fn %{term_key: term_key} ->
+      Map.fetch!(tensor_by_term, term_key)
     end)
   end
 
