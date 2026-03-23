@@ -59,10 +59,18 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.Application.ExecuteCircuit`
 - Domain modules:
   - `NxQuantum.Estimator.Batch`
+  - `NxQuantum.Estimator.Batch.Strategy`
+  - `NxQuantum.Estimator.Batch.Strategies.Deterministic`
+  - `NxQuantum.Estimator.Batch.Strategies.ScalarFallback`
+  - `NxQuantum.Estimator.ExecutionMode`
+  - `NxQuantum.Estimator.ResultBuilder`
+  - `NxQuantum.Estimator.RuntimeProfile`
+  - `NxQuantum.Estimator.SampledExpval`
   - `NxQuantum.Estimator.Scalar`
   - `NxQuantum.Estimator.ObservableSpecs`
   - `NxQuantum.Estimator.Measurement`
   - `NxQuantum.Estimator.Stochastic`
+  - `NxQuantum.Observables.SparsePauli`
 - Ports/adapters:
   - `NxQuantum.Ports.Simulator`
   - `NxQuantum.Adapters.Simulators.StateVector`
@@ -86,6 +94,11 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.Sampler.Options`
   - `NxQuantum.Sampler.Engine`
   - `NxQuantum.Sampler.ResultBuilder`
+  - `NxQuantum.Sampler.ExecutionMode`
+  - `NxQuantum.Sampler.BatchedRunner`
+  - `NxQuantum.Sampler.Batch.Strategy`
+  - `NxQuantum.Sampler.Batch.Strategies.Sequential`
+  - `NxQuantum.Sampler.Batch.Strategies.Parallel`
   - mitigation pipeline pass contracts
   - `NxQuantum.Mitigation.PassPipeline`
   - `NxQuantum.Mitigation.Passes.Readout`
@@ -121,6 +134,7 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.Compiler.Passes.Simplify`
   - `NxQuantum.Compiler.Passes.Fuse`
   - `NxQuantum.Compiler.Passes.Cancel`
+  - `NxQuantum.Compiler.Passes.Resynthesize1Q`
   - `NxQuantum.Compiler.Theta`
 - Invariants:
   - semantic equivalence under optimization

@@ -8,16 +8,16 @@ defmodule NxQuantum.Compiler do
   alias NxQuantum.Circuit
   alias NxQuantum.Compiler.PassPipeline
 
-  @type pass :: :simplify | :fuse | :cancel
+  @type pass :: :simplify | :fuse | :cancel | :resynthesize_1q
 
   @spec optimize(Circuit.t(), keyword()) :: {Circuit.t(), map()}
   def optimize(%Circuit{} = circuit, opts \\ []) do
-    passes = Keyword.get(opts, :passes, [:simplify, :fuse, :cancel])
+    passes = Keyword.get(opts, :passes, [:simplify, :fuse, :cancel, :resynthesize_1q, :simplify])
     before = length(circuit.operations)
 
     optimized_ops =
       Enum.reduce(passes, circuit.operations, fn pass, operations ->
-        PassPipeline.run(pass, operations)
+        PassPipeline.run(pass, operations, opts)
       end)
 
     optimized = %{circuit | operations: optimized_ops}

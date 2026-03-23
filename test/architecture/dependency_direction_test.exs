@@ -11,7 +11,8 @@ defmodule NxQuantum.Architecture.DependencyDirectionTest do
     "lib/nx_quantum/gates.ex",
     "lib/nx_quantum/observables.ex",
     "lib/nx_quantum/observables/error.ex",
-    "lib/nx_quantum/observables/schema.ex"
+    "lib/nx_quantum/observables/schema.ex",
+    "lib/nx_quantum/observables/sparse_pauli.ex"
   ]
 
   test "domain layer does not depend on application or adapters" do

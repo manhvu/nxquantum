@@ -8,9 +8,9 @@ defmodule NxQuantum.Sampler do
   - simple probability/count outputs for foundational workflows.
   """
 
-  alias NxQuantum.Application.BatchExecutor
   alias NxQuantum.Circuit
   alias NxQuantum.Estimator
+  alias NxQuantum.Sampler.BatchedRunner
   alias NxQuantum.Sampler.Engine
   alias NxQuantum.Sampler.Options
   alias NxQuantum.Sampler.Result
@@ -34,7 +34,7 @@ defmodule NxQuantum.Sampler do
         values = Nx.to_flat_list(params_batch)
 
         results =
-          BatchExecutor.run(values, opts, fn value ->
+          BatchedRunner.run(values, opts, fn value ->
             value
             |> Nx.tensor()
             |> circuit_builder.()

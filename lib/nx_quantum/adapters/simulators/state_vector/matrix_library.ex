@@ -31,6 +31,29 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary do
     end)
   end
 
+  @spec parity_signs(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def parity_signs(mask, qubits) do
+    Cache.fetch({:observable, :parity_signs, mask, qubits}, fn ->
+      size = trunc(:math.pow(2, qubits))
+
+      signs =
+        for index <- 0..(size - 1) do
+          if odd_parity?(index &&& mask), do: -1.0, else: 1.0
+        end
+
+      Nx.tensor(signs, type: {:f, 64})
+    end)
+  end
+
+  @spec bit_flip_permutation(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def bit_flip_permutation(mask, qubits) do
+    Cache.fetch({:observable, :bit_flip_permutation, mask, qubits}, fn ->
+      size = trunc(:math.pow(2, qubits))
+      mapped = for index <- 0..(size - 1), do: bxor(index, mask)
+      Nx.tensor(mapped, type: {:s, 64})
+    end)
+  end
+
   @spec gate_matrix(GateOperation.t(), pos_integer()) :: Nx.Tensor.t()
   def gate_matrix(%GateOperation{name: :h, wires: [wire]}, qubits),
     do: Cache.fetch({:gate, :h, wire, qubits}, fn -> full_single_wire_matrix(hadamard(), wire, qubits) end)
@@ -273,4 +296,10 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.MatrixLibrary do
       g11: matrix |> Nx.slice([1, 1], [1, 1]) |> Nx.reshape({})
     }
   end
+
+  defp odd_parity?(value), do: rem(popcount(value), 2) == 1
+
+  defp popcount(value), do: popcount(value, 0)
+  defp popcount(0, acc), do: acc
+  defp popcount(value, acc), do: popcount(value &&& value - 1, acc + 1)
 end

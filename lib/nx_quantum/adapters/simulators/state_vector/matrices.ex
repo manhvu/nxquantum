@@ -12,6 +12,12 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.Matrices do
   @spec pauli_z_signs(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
   def pauli_z_signs(wire, qubits), do: MatrixLibrary.pauli_z_signs(wire, qubits)
 
+  @spec parity_signs(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def parity_signs(mask, qubits), do: MatrixLibrary.parity_signs(mask, qubits)
+
+  @spec bit_flip_permutation(non_neg_integer(), pos_integer()) :: Nx.Tensor.t()
+  def bit_flip_permutation(mask, qubits), do: MatrixLibrary.bit_flip_permutation(mask, qubits)
+
   @spec gate_matrix(NxQuantum.GateOperation.t(), pos_integer()) :: Nx.Tensor.t()
   def gate_matrix(op, qubits), do: MatrixLibrary.gate_matrix(op, qubits)
 

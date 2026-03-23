@@ -39,6 +39,7 @@ Behavior ownership is defined by executable features, not by file location alone
 
 - `NxQuantum.Ports.Simulator`
   - `expectation/2`
+  - `expectations/3` (optional callback for shared-state multi-observable execution)
   - `apply_gates/3`
 - `NxQuantum.Ports.Backend`
   - `compile/3`
@@ -66,7 +67,19 @@ Behavior ownership is defined by executable features, not by file location alone
 
 Current internal decomposition examples:
 
-- Estimation internals: `NxQuantum.Estimator.Batch`, `NxQuantum.Estimator.Scalar`, `NxQuantum.Estimator.ObservableSpecs`, `NxQuantum.Estimator.Measurement`, `NxQuantum.Estimator.Stochastic`.
+- Estimation internals:
+  - `NxQuantum.Estimator.Batch`
+  - `NxQuantum.Estimator.Batch.Strategy`
+  - `NxQuantum.Estimator.Batch.Strategies.Deterministic`
+  - `NxQuantum.Estimator.Batch.Strategies.ScalarFallback`
+  - `NxQuantum.Estimator.ExecutionMode`
+  - `NxQuantum.Estimator.ResultBuilder`
+  - `NxQuantum.Estimator.RuntimeProfile`
+  - `NxQuantum.Estimator.SampledExpval`
+  - `NxQuantum.Estimator.Scalar`
+  - `NxQuantum.Estimator.ObservableSpecs`
+  - `NxQuantum.Estimator.Measurement`
+  - `NxQuantum.Estimator.Stochastic`
 - Transpilation internals: `NxQuantum.Transpiler.Topology`, `NxQuantum.Transpiler.Router`, `NxQuantum.Transpiler.SwapInsertion`, `NxQuantum.Transpiler.Report`.
 - Differentiation internals: `NxQuantum.Grad.Numeric`, `NxQuantum.Grad.Adjoint`, `NxQuantum.Grad.Error`.
 - Simulator internals: `NxQuantum.Adapters.Simulators.StateVector.State`, `NxQuantum.Adapters.Simulators.StateVector.Matrices`.
@@ -86,10 +99,18 @@ Current internal decomposition examples:
   - `NxQuantum.Adapters.Simulators.StateVector.Operations`
   - `NxQuantum.Adapters.Simulators.StateVector.Cache`
   - `NxQuantum.Adapters.Simulators.StateVector.KeyEncoder`
-- Compiler internals: `NxQuantum.Compiler.PassPipeline`, `NxQuantum.Compiler.Passes.*`, `NxQuantum.Compiler.Theta`.
+- Compiler internals: `NxQuantum.Compiler.PassPipeline`, `NxQuantum.Compiler.Passes.*` (including `Resynthesize1Q`), `NxQuantum.Compiler.Theta`.
 - Mitigation internals: `NxQuantum.Mitigation.PassPipeline`, `NxQuantum.Mitigation.Passes.Readout`, `NxQuantum.Mitigation.Passes.ZneLinear`, `NxQuantum.Mitigation.Trace`.
 - Runtime internals: `NxQuantum.Runtime.Catalog`, `NxQuantum.Runtime.Detection`, `NxQuantum.Runtime.Fallback`.
-- Sampler internals: `NxQuantum.Sampler.Options`, `NxQuantum.Sampler.Engine`, `NxQuantum.Sampler.ResultBuilder`.
+- Sampler internals:
+  - `NxQuantum.Sampler.Options`
+  - `NxQuantum.Sampler.Engine`
+  - `NxQuantum.Sampler.ResultBuilder`
+  - `NxQuantum.Sampler.ExecutionMode`
+  - `NxQuantum.Sampler.BatchedRunner`
+  - `NxQuantum.Sampler.Batch.Strategy`
+  - `NxQuantum.Sampler.Batch.Strategies.Sequential`
+  - `NxQuantum.Sampler.Batch.Strategies.Parallel`
 - Batch/reproducibility internals:
   - `NxQuantum.Application.BatchExecutor`
   - `NxQuantum.Random.Seed`
@@ -100,6 +121,7 @@ Current internal decomposition examples:
   - `NxQuantum.Observability.ProfileStrategy.Forensics`
 - Circuit domain invariants: `NxQuantum.Circuit.Validation`, `NxQuantum.Circuit.Error`.
 - Shared observable/measurement schema: `NxQuantum.Observables.Schema`, `NxQuantum.Observables.Error`.
+- Sparse observable internals: `NxQuantum.Observables.SparsePauli`.
 
 ## Dependency Direction
 

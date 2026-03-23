@@ -44,6 +44,7 @@ defmodule NxQuantum.PublicApiContractTest do
       assert_exported(NxQuantum.Compiler, :optimize, 1)
       assert_exported(Kernels, :matrix, 1)
       assert_exported(Estimator, :batched_expectation, 3)
+      assert_exported(Estimator, :sampled_expectation_from_counts, 2)
       assert_exported(Sampler, :batched_run, 3)
       assert_exported(Mitigation, :pipeline, 2)
       assert_exported(Transpiler, :run, 2)

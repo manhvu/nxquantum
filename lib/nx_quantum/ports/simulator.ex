@@ -7,5 +7,8 @@ defmodule NxQuantum.Ports.Simulator do
   alias NxQuantum.GateOperation
 
   @callback expectation(Circuit.t(), keyword()) :: Nx.Tensor.t()
+  @callback expectations(Circuit.t(), [map()], keyword()) :: Nx.Tensor.t()
   @callback apply_gates(Nx.Tensor.t(), [GateOperation.t()], keyword()) :: Nx.Tensor.t()
+
+  @optional_callbacks expectations: 3
 end

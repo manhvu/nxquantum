@@ -70,6 +70,63 @@ defmodule NxQuantum.EstimatorTest do
       assert length(result.metadata.observables) == 3
     end
 
+    test "matches scalar expectations for each observable on deterministic batch path" do
+      circuit =
+        [qubits: 1]
+        |> Circuit.new()
+        |> Gates.rx(0, theta: Nx.tensor(0.41))
+        |> Gates.rz(0, theta: Nx.tensor(0.27))
+
+      observables = [:pauli_x, :pauli_y, :pauli_z]
+
+      assert {:ok, %Result{} = batch} = Estimator.run(circuit, observables: observables, wire: 0)
+
+      scalar_values =
+        Enum.map(observables, fn observable ->
+          {:ok, tensor} = Estimator.expectation_result(circuit, observable: observable, wire: 0)
+          Nx.to_number(tensor)
+        end)
+
+      assert Nx.to_flat_list(batch.values) == scalar_values
+    end
+
+    test "returns typed error for unsupported runtime profile in batch mode" do
+      circuit = Circuit.new(qubits: 1)
+
+      assert {:error, %{code: :unsupported_runtime_profile}} =
+               Estimator.run(circuit, observables: [:pauli_x, :pauli_z], wire: 0, runtime_profile: :unknown_profile)
+    end
+
+    test "parallel observable evaluation preserves ordering and values" do
+      circuit =
+        [qubits: 3]
+        |> Circuit.new()
+        |> Gates.h(0)
+        |> Gates.ry(1, theta: Nx.tensor(0.31))
+        |> Gates.rx(2, theta: Nx.tensor(0.23))
+
+      observables = [:pauli_x, :pauli_y, :pauli_z, :pauli_x, :pauli_z, :pauli_y]
+
+      assert {:ok, sequential} =
+               Estimator.run(circuit,
+                 observables: observables,
+                 wire: 0,
+                 parallel_observables: false
+               )
+
+      assert {:ok, parallel} =
+               Estimator.run(circuit,
+                 observables: observables,
+                 wire: 0,
+                 parallel_observables: true,
+                 parallel_observables_threshold: 2,
+                 max_concurrency: 4
+               )
+
+      assert Nx.to_flat_list(sequential.values) == Nx.to_flat_list(parallel.values)
+      assert sequential.metadata.observables == parallel.metadata.observables
+    end
+
     test "returns typed error for invalid observable" do
       circuit = Circuit.new(qubits: 1)
 

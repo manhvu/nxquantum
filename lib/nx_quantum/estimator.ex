@@ -12,6 +12,7 @@ defmodule NxQuantum.Estimator do
   alias NxQuantum.Estimator.Batch
   alias NxQuantum.Estimator.ObservableSpecs
   alias NxQuantum.Estimator.Result
+  alias NxQuantum.Estimator.SampledExpval
   alias NxQuantum.Estimator.Scalar
 
   @spec expectation(Circuit.t(), keyword()) :: Nx.Tensor.t()
@@ -35,6 +36,11 @@ defmodule NxQuantum.Estimator do
     with {:ok, normalized_specs} <- ObservableSpecs.normalize(opts) do
       Batch.run(circuit, normalized_specs, opts)
     end
+  end
+
+  @spec sampled_expectation_from_counts(map(), keyword()) :: {:ok, Nx.Tensor.t()} | {:error, map()}
+  def sampled_expectation_from_counts(counts, opts \\ []) when is_map(counts) do
+    SampledExpval.from_counts(counts, opts)
   end
 
   @spec batched_expectation((Nx.Tensor.t() -> Circuit.t()), Nx.Tensor.t(), keyword()) ::

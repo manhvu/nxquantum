@@ -22,4 +22,32 @@ defmodule NxQuantum.CompilerTest do
     assert hd(optimized.operations).name == :rx
     assert_in_delta Map.fetch!(hd(optimized.operations).params, :theta), 0.3, 1.0e-8
   end
+
+  test "resynthesize_1q reduces run cost while preserving expectations" do
+    circuit =
+      [qubits: 1]
+      |> Circuit.new()
+      |> Gates.h(0)
+      |> Gates.x(0)
+      |> Gates.h(0)
+      |> Gates.rz(0, theta: 0.3)
+      |> Gates.rz(0, theta: 0.4)
+
+    {optimized, report} = Compiler.optimize(circuit, passes: [:resynthesize_1q])
+
+    assert report.gate_count_after < report.gate_count_before
+
+    before_x = circuit |> Circuit.expectation(observable: :pauli_x, wire: 0) |> Nx.to_number()
+    after_x = optimized |> Circuit.expectation(observable: :pauli_x, wire: 0) |> Nx.to_number()
+
+    before_y = circuit |> Circuit.expectation(observable: :pauli_y, wire: 0) |> Nx.to_number()
+    after_y = optimized |> Circuit.expectation(observable: :pauli_y, wire: 0) |> Nx.to_number()
+
+    before_z = circuit |> Circuit.expectation(observable: :pauli_z, wire: 0) |> Nx.to_number()
+    after_z = optimized |> Circuit.expectation(observable: :pauli_z, wire: 0) |> Nx.to_number()
+
+    assert_in_delta after_x, before_x, 1.0e-6
+    assert_in_delta after_y, before_y, 1.0e-6
+    assert_in_delta after_z, before_z, 1.0e-6
+  end
 end
