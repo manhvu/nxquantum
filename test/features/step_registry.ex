@@ -29,7 +29,8 @@ defmodule NxQuantum.Features.StepRegistry do
     NxQuantum.Features.Steps.ProviderSimulationStrategyFallbackSteps,
     NxQuantum.Features.Steps.ProviderLiveExecutionContractsSteps,
     NxQuantum.Features.Steps.CompilerTranspilationValueProfilesSteps,
-    NxQuantum.Features.Steps.ObservabilityTroubleshootingContractsSteps
+    NxQuantum.Features.Steps.ObservabilityTroubleshootingContractsSteps,
+    NxQuantum.Features.Steps.MigrationAssuranceWorkflowsSteps
   ]
 
   @feature_to_module Map.new(@step_modules, &{&1.feature(), &1})
