@@ -33,7 +33,8 @@ defmodule NxQuantum.Features.StepRegistry do
     NxQuantum.Features.Steps.MigrationAssuranceWorkflowsSteps,
     NxQuantum.Features.Steps.HighValuePerformanceMatrixSteps,
     NxQuantum.Features.Steps.QuantumAiToolContractsSteps,
-    NxQuantum.Features.Steps.HybridQuantumAiBenchmarkPackSteps
+    NxQuantum.Features.Steps.HybridQuantumAiBenchmarkPackSteps,
+    NxQuantum.Features.Steps.QuantumAiRolloutGatesSteps
   ]
 
   @feature_to_module Map.new(@step_modules, &{&1.feature(), &1})
