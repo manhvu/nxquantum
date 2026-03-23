@@ -34,6 +34,13 @@ defmodule NxQuantum.ProviderBridgeTest do
     assert polled.state == :completed
     assert result.state == :completed
     assert result.payload == payload
+    assert submitted.schema_version == :v1
+    assert polled.schema_version == :v1
+    assert result.schema_version == :v1
+    assert is_binary(submitted.correlation_id)
+    assert is_binary(submitted.idempotency_key)
+    assert is_binary(result.correlation_id)
+    assert is_binary(result.idempotency_key)
   end
 
   test "poll_job/3 maps timeout to provider_transport_error" do
@@ -41,6 +48,18 @@ defmodule NxQuantum.ProviderBridgeTest do
 
     assert {:error, %{code: :provider_transport_error, operation: :poll, provider: :in_memory_provider, reason: :timeout}} =
              ProviderBridge.poll_job(InMemory, submitted, simulate_timeout: true)
+  end
+
+  test "submit_job/3 accepts explicit correlation and idempotency contract fields" do
+    assert {:ok, submitted} =
+             ProviderBridge.submit_job(InMemory, %{circuit_id: "c2"},
+               correlation_id: "corr_external_123",
+               idempotency_key: "idem_external_123"
+             )
+
+    assert submitted.correlation_id == "corr_external_123"
+    assert submitted.idempotency_key == "idem_external_123"
+    assert submitted.metadata.contract_schema_version == :v1
   end
 
   test "submit_job/3 maps invalid provider response shape" do

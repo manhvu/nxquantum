@@ -4,7 +4,7 @@ defmodule NxQuantum.ProviderBridge.Job do
   """
 
   @enforce_keys [:id, :state, :provider, :target]
-  defstruct [:id, :state, :provider, :target, :submitted_at, metadata: %{}]
+  defstruct [:id, :state, :provider, :target, :submitted_at, :schema_version, :correlation_id, :idempotency_key, metadata: %{}]
 
   @type state :: :submitted | :queued | :running | :completed | :cancelled | :failed
 
@@ -14,6 +14,9 @@ defmodule NxQuantum.ProviderBridge.Job do
           provider: atom() | String.t() | module(),
           target: String.t(),
           submitted_at: String.t() | nil,
+          schema_version: atom() | nil,
+          correlation_id: String.t() | nil,
+          idempotency_key: String.t() | nil,
           metadata: map()
         }
 end

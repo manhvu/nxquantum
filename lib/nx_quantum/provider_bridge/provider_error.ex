@@ -4,7 +4,19 @@ defmodule NxQuantum.ProviderBridge.ProviderError do
   """
 
   @enforce_keys [:code, :operation, :provider]
-  defstruct [:code, :operation, :provider, :reason, :state, :response, :capability, metadata: %{}]
+  defstruct [
+    :code,
+    :operation,
+    :provider,
+    :reason,
+    :state,
+    :response,
+    :capability,
+    :schema_version,
+    :correlation_id,
+    :idempotency_key,
+    metadata: %{}
+  ]
 
   @type code ::
           :provider_transport_error
@@ -23,6 +35,9 @@ defmodule NxQuantum.ProviderBridge.ProviderError do
           state: atom() | nil,
           response: term() | nil,
           capability: atom() | nil,
+          schema_version: atom() | nil,
+          correlation_id: String.t() | nil,
+          idempotency_key: String.t() | nil,
           metadata: map()
         }
 end
