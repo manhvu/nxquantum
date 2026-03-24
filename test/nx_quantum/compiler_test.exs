@@ -50,4 +50,41 @@ defmodule NxQuantum.CompilerTest do
     assert_in_delta after_y, before_y, 1.0e-6
     assert_in_delta after_z, before_z, 1.0e-6
   end
+
+  test "compile/2 exposes deterministic profile diagnostics and report fields" do
+    circuit =
+      [qubits: 2]
+      |> Circuit.new()
+      |> Gates.h(0)
+      |> Gates.cnot(control: 0, target: 1)
+
+    target = %{
+      gateset: [:h, :cnot, :rx, :ry, :rz],
+      coupling_map: [{0, 1}]
+    }
+
+    assert {:ok, %{circuit: compiled, report: report}} =
+             Compiler.compile(circuit,
+               target: target,
+               optimization_level: 2,
+               routing_strategy: :sabre_like,
+               scheduling_strategy: :asap,
+               calibration_profile: :fidelity_first
+             )
+
+    assert match?(%Circuit{}, compiled)
+    assert report.optimization_level == 2
+    assert report.routing.strategy == :sabre_like
+    assert report.scheduling.strategy == :asap
+    assert report.cost_model.profile == :fidelity_first
+    assert is_list(report.diagnostics)
+    assert report.rejected_alternatives.routing == [:shortest_path]
+  end
+
+  test "compile/2 returns typed error for invalid optimization level" do
+    circuit = Circuit.new(qubits: 1)
+
+    assert {:error, %{code: :compiler_invalid_target, stage: :validation}} =
+             Compiler.compile(circuit, optimization_level: 99)
+  end
 end
