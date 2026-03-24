@@ -99,12 +99,15 @@ defmodule NxQuantum.Application.ProviderLifecycle.Runner do
   end
 
   defp attach_contract_context(%Job{} = job, operation, provider, source, opts) do
-    correlation_id = resolve_correlation_id(job.correlation_id, operation, provider, source, opts)
-    idempotency_key = resolve_idempotency_key(job.idempotency_key, operation, provider, source, opts)
+    token_source = job.id || source
+    request_id = resolve_request_id(job.request_id, operation, provider, token_source, opts)
+    correlation_id = resolve_correlation_id(job.correlation_id, operation, provider, token_source, opts)
+    idempotency_key = resolve_idempotency_key(job.idempotency_key, operation, provider, token_source, opts)
 
     %{
       job
       | schema_version: Serialization.schema_version(),
+        request_id: request_id,
         correlation_id: correlation_id,
         idempotency_key: idempotency_key,
         metadata: Map.put(job.metadata || %{}, :contract_schema_version, Serialization.schema_version())
@@ -112,12 +115,15 @@ defmodule NxQuantum.Application.ProviderLifecycle.Runner do
   end
 
   defp attach_contract_context(%Result{} = result, operation, provider, source, opts) do
-    correlation_id = resolve_correlation_id(result.correlation_id, operation, provider, source, opts)
-    idempotency_key = resolve_idempotency_key(result.idempotency_key, operation, provider, source, opts)
+    token_source = result.job_id || source
+    request_id = resolve_request_id(result.request_id, operation, provider, token_source, opts)
+    correlation_id = resolve_correlation_id(result.correlation_id, operation, provider, token_source, opts)
+    idempotency_key = resolve_idempotency_key(result.idempotency_key, operation, provider, token_source, opts)
 
     %{
       result
       | schema_version: Serialization.schema_version(),
+        request_id: request_id,
         correlation_id: correlation_id,
         idempotency_key: idempotency_key,
         metadata: Map.put(result.metadata || %{}, :contract_schema_version, Serialization.schema_version())
@@ -125,12 +131,14 @@ defmodule NxQuantum.Application.ProviderLifecycle.Runner do
   end
 
   defp attach_contract_context(%ProviderError{} = error, operation, provider, source, opts) do
+    request_id = resolve_request_id(error.request_id, operation, provider, source, opts)
     correlation_id = resolve_correlation_id(error.correlation_id, operation, provider, source, opts)
     idempotency_key = resolve_idempotency_key(error.idempotency_key, operation, provider, source, opts)
 
     %{
       error
       | schema_version: Serialization.schema_version(),
+        request_id: request_id,
         correlation_id: correlation_id,
         idempotency_key: idempotency_key,
         metadata: Map.put(error.metadata || %{}, :contract_schema_version, Serialization.schema_version())
@@ -150,6 +158,17 @@ defmodule NxQuantum.Application.ProviderLifecycle.Runner do
     end
   end
 
+  defp resolve_request_id(existing, _operation, _provider, _source, _opts) when is_binary(existing) and existing != "",
+    do: existing
+
+  defp resolve_request_id(_existing, operation, provider, source, opts) do
+    if value = Keyword.get(opts, :request_id) do
+      value
+    else
+      deterministic_token("req", operation, provider, source)
+    end
+  end
+
   defp resolve_idempotency_key(existing, _operation, _provider, _source, _opts)
        when is_binary(existing) and existing != "", do: existing
 
@@ -162,12 +181,33 @@ defmodule NxQuantum.Application.ProviderLifecycle.Runner do
   end
 
   defp deterministic_token(prefix, operation, provider, source) do
+    if is_binary(source) and source != "" do
+      "#{prefix}_#{source}"
+    else
+      deterministic_token_hashed(prefix, operation, provider, source)
+    end
+  end
+
+  defp deterministic_token_hashed(prefix, operation, provider, source) do
+    canonical_source = canonicalize(source)
+
     digest =
       :sha256
-      |> :crypto.hash(:erlang.term_to_binary(%{operation: operation, provider: provider, source: source}))
+      |> :crypto.hash(:erlang.term_to_binary({operation, provider, canonical_source}, [:deterministic]))
       |> Base.encode16(case: :lower)
       |> binary_part(0, 16)
 
     "#{prefix}_#{digest}"
   end
+
+  defp canonicalize(%_{} = struct), do: struct |> Map.from_struct() |> canonicalize()
+
+  defp canonicalize(%{} = map) do
+    map
+    |> Enum.sort_by(fn {key, _value} -> to_string(key) end)
+    |> Enum.map(fn {key, value} -> {key, canonicalize(value)} end)
+  end
+
+  defp canonicalize(list) when is_list(list), do: Enum.map(list, &canonicalize/1)
+  defp canonicalize(other), do: other
 end

@@ -9,6 +9,10 @@ defmodule NxQuantum.ProviderTransportReadinessTest do
 
   setup do
     keys = [
+      "NXQ_PROVIDER_LIVE",
+      "NXQ_PROVIDER_LIVE_IBM_RUNTIME",
+      "NXQ_PROVIDER_LIVE_AWS_BRAKET",
+      "NXQ_PROVIDER_LIVE_AZURE_QUANTUM",
       "NXQ_PROVIDER_LIVE_SMOKE",
       "NXQ_PROVIDER_LIVE_SMOKE_IBM_RUNTIME",
       "NXQ_PROVIDER_LIVE_SMOKE_AWS_BRAKET",
@@ -64,9 +68,79 @@ defmodule NxQuantum.ProviderTransportReadinessTest do
 
     assert readiness.requested_mode == :live_smoke
     assert readiness.mode == :fixture
+    assert readiness.downgraded_to_fixture? == true
     refute readiness.live_smoke.ready?
     refute readiness.live_smoke.env_enabled?
     assert readiness.live_smoke.missing_config_keys == []
+  end
+
+  test "live mode requests fail fast without env readiness" do
+    readiness =
+      TransportSupport.readiness(
+        :ibm_runtime,
+        [
+          transport_mode: :live,
+          provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
+        ],
+        [:auth_token, :channel, :backend],
+        :submit
+      )
+
+    assert readiness.requested_mode == :live
+    assert readiness.mode == :fixture
+    assert readiness.downgraded_to_fixture? == true
+
+    assert {:error, %{code: :provider_capability_mismatch, capability: :live_mode_unavailable}} =
+             ProviderBridge.submit_job(IBMRuntime, %{workflow: :sampler, shots: 64},
+               transport_mode: :live,
+               target: "ibm_backend_simulator",
+               provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
+             )
+  end
+
+  test "env-gated live mode executes provider lifecycle using live transport responses" do
+    System.put_env("NXQ_PROVIDER_LIVE", "true")
+
+    live_responses = %{
+      submit: %{"raw_state" => "SUBMITTED", "provider_job_id" => "ibm_live_job_1"},
+      poll: %{"raw_state" => "RUNNING"},
+      fetch_result: %{
+        "raw_state" => "COMPLETED",
+        "payload" => %{"workflow" => "sampler", "counts" => %{"00" => 12, "11" => 4}}
+      }
+    }
+
+    assert {:ok, submitted} =
+             ProviderBridge.submit_job(IBMRuntime, %{workflow: :sampler, shots: 16},
+               transport_mode: :live,
+               target: "ibm_backend_simulator",
+               provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"},
+               live_responses: live_responses
+             )
+
+    assert submitted.metadata.transport.mode == :live
+
+    assert {:ok, running} =
+             ProviderBridge.poll_job(IBMRuntime, submitted,
+               transport_mode: :live,
+               provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"},
+               live_responses: live_responses
+             )
+
+    assert running.state == :running
+    assert running.metadata.transport.mode == :live
+
+    completed = %{running | state: :completed}
+
+    assert {:ok, result} =
+             ProviderBridge.fetch_result(IBMRuntime, completed,
+               transport_mode: :live,
+               provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"},
+               live_responses: live_responses
+             )
+
+    assert result.metadata.transport.mode == :live
+    assert result.payload["workflow"] == "sampler"
   end
 
   test "env-gated live-smoke readiness is reflected in provider metadata without changing fixture payloads" do

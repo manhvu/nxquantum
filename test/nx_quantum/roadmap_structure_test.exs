@@ -43,4 +43,3 @@ defmodule NxQuantum.RoadmapStructureTest do
     end
   end
 end
-

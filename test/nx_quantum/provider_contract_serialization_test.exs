@@ -19,11 +19,13 @@ defmodule NxQuantum.ProviderContractSerializationTest do
     result_map = Serialization.to_external_map(result)
 
     assert job_map["schema_version"] == "v1"
+    assert is_binary(job_map["request_id"])
     assert job_map["type"] == "job"
     assert is_binary(job_map["correlation_id"])
     assert is_binary(job_map["idempotency_key"])
 
     assert result_map["schema_version"] == "v1"
+    assert is_binary(result_map["request_id"])
     assert result_map["type"] == "result"
     assert is_map(result_map["payload"])
   end

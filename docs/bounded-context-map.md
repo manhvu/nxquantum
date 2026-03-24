@@ -213,9 +213,12 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - NxQuantum.Adapters.Providers.AwsBraket
   - NxQuantum.Adapters.Providers.AzureQuantum
   - NxQuantum.Adapters.Providers.Common.LifecycleSupport
+  - NxQuantum.Adapters.Providers.Common.LiveTransport
   - NxQuantum.Adapters.Providers.Common.StateMapper
+  - NxQuantum.Adapters.Providers.Common.TransportSupport
   - NxQuantum.Adapters.Observability.OpenTelemetry
   - NxQuantum.Adapters.Observability.Noop
+  - NxQuantum.ProviderBridge.ReplayFixture
 - Observability modules:
   - NxQuantum.Observability
   - NxQuantum.Observability.Profile

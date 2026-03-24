@@ -6,6 +6,7 @@ defmodule NxQuantum.Adapters.Providers.IBMRuntime do
   @behaviour NxQuantum.Ports.Provider
 
   alias NxQuantum.Adapters.Providers.Common.LifecycleSupport
+  alias NxQuantum.Adapters.Providers.Common.LiveTransport
   alias NxQuantum.Adapters.Providers.Common.StateMapper
   alias NxQuantum.Adapters.Providers.Common.TransportSupport
   alias NxQuantum.ProviderBridge.Job
@@ -37,12 +38,14 @@ defmodule NxQuantum.Adapters.Providers.IBMRuntime do
 
   @impl true
   def submit(payload, opts \\ []) when is_map(payload) do
-    with :ok <- LifecycleSupport.maybe_force_error(:submit, opts),
-         {:ok, _config} <- Config.fetch_required(provider_id(), opts, @transport_required_config_keys, :submit),
-         {:ok, raw_state} <- LifecycleSupport.raw_state(:submit, opts, &default_raw_state/1),
-         {:ok, state, metadata} <- StateMapper.map(:submit, provider_id(), @submit_states, raw_state, target(opts)) do
-      transport = TransportSupport.readiness(provider_id(), opts, @transport_required_config_keys, :submit)
+    transport = TransportSupport.readiness(provider_id(), opts, @transport_required_config_keys, :submit)
 
+    with :ok <- LifecycleSupport.maybe_force_error(:submit, opts),
+         :ok <- TransportSupport.require_live_ready(transport, :submit),
+         {:ok, _config} <- Config.fetch_required(provider_id(), opts, @transport_required_config_keys, :submit),
+         {:ok, live_response} <- live_response(:submit, payload, transport, opts),
+         {:ok, raw_state} <- raw_state(:submit, opts, live_response),
+         {:ok, state, metadata} <- StateMapper.map(:submit, provider_id(), @submit_states, raw_state, target(opts)) do
       LifecycleSupport.maybe_notify_submit(provider_id(), opts)
 
       {:ok,
@@ -65,36 +68,42 @@ defmodule NxQuantum.Adapters.Providers.IBMRuntime do
 
   @impl true
   def poll(%Job{} = job, opts \\ []) do
+    transport = TransportSupport.readiness(provider_id(), opts, [], :poll)
+
     with :ok <- LifecycleSupport.maybe_force_error(:poll, opts),
-         {:ok, raw_state} <- LifecycleSupport.raw_state(:poll, opts, &default_raw_state/1),
+         :ok <- TransportSupport.require_live_ready(transport, :poll),
+         {:ok, live_response} <- live_response(:poll, Map.from_struct(job), transport, opts),
+         {:ok, raw_state} <- raw_state(:poll, opts, live_response),
          {:ok, state, metadata} <-
            StateMapper.map(:poll, provider_id(), @poll_states, raw_state, job.target, %{job_id: job.id}) do
-      transport = TransportSupport.readiness(provider_id(), opts, [], :poll)
-
       {:ok, %{job | state: state, metadata: Map.merge(job.metadata || %{}, Map.put(metadata, :transport, transport))}}
     end
   end
 
   @impl true
   def cancel(%Job{} = job, opts \\ []) do
+    transport = TransportSupport.readiness(provider_id(), opts, [], :cancel)
+
     with :ok <- LifecycleSupport.maybe_force_error(:cancel, opts),
-         {:ok, raw_state} <- LifecycleSupport.raw_state(:cancel, opts, &default_raw_state/1),
+         :ok <- TransportSupport.require_live_ready(transport, :cancel),
+         {:ok, live_response} <- live_response(:cancel, Map.from_struct(job), transport, opts),
+         {:ok, raw_state} <- raw_state(:cancel, opts, live_response),
          {:ok, state, metadata} <-
            StateMapper.map(:cancel, provider_id(), %{"CANCELLED" => :cancelled}, raw_state, job.target, %{
              job_id: job.id
            }) do
-      transport = TransportSupport.readiness(provider_id(), opts, [], :cancel)
-
       {:ok, %{job | state: state, metadata: Map.merge(job.metadata || %{}, Map.put(metadata, :transport, transport))}}
     end
   end
 
   @impl true
   def fetch_result(%Job{state: state} = job, opts \\ []) do
+    transport = TransportSupport.readiness(provider_id(), opts, [], :fetch_result)
+
     with :ok <- LifecycleSupport.maybe_force_error(:fetch_result, opts),
+         :ok <- TransportSupport.require_live_ready(transport, :fetch_result),
          :ok <- LifecycleSupport.validate_terminal_state(state) do
-      payload = Keyword.get(opts, :fixture_payload, default_payload(job))
-      transport = TransportSupport.readiness(provider_id(), opts, [], :fetch_result)
+      payload = result_payload(job, transport, opts)
       result = LifecycleSupport.result(job, provider_id(), "ibm.v1", payload)
 
       {:ok, %{result | metadata: Map.put(result.metadata, :transport, transport)}}
@@ -135,4 +144,21 @@ defmodule NxQuantum.Adapters.Providers.IBMRuntime do
 
   defp normalize_shots(shots) when is_integer(shots) and shots >= 0, do: shots
   defp normalize_shots(_), do: 0
+
+  defp live_response(_operation, _payload, %{mode: mode}, _opts) when mode in [:fixture, :live_smoke], do: {:ok, %{}}
+
+  defp live_response(operation, payload, _transport, opts),
+    do: LiveTransport.lifecycle(provider_id(), operation, payload, opts)
+
+  defp raw_state(_operation, _opts, %{raw_state: raw_state}) when is_binary(raw_state), do: {:ok, raw_state}
+  defp raw_state(operation, opts, _response), do: LifecycleSupport.raw_state(operation, opts, &default_raw_state/1)
+
+  defp result_payload(job, %{mode: :fixture}, opts), do: Keyword.get(opts, :fixture_payload, default_payload(job))
+
+  defp result_payload(job, _transport, opts) do
+    case LiveTransport.lifecycle(provider_id(), :fetch_result, Map.from_struct(job), opts) do
+      {:ok, %{payload: %{} = payload}} -> payload
+      _ -> default_payload(job)
+    end
+  end
 end

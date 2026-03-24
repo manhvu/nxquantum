@@ -37,6 +37,9 @@ defmodule NxQuantum.ProviderBridgeTest do
     assert submitted.schema_version == :v1
     assert polled.schema_version == :v1
     assert result.schema_version == :v1
+    assert is_binary(submitted.request_id)
+    assert is_binary(polled.request_id)
+    assert is_binary(result.request_id)
     assert is_binary(submitted.correlation_id)
     assert is_binary(submitted.idempotency_key)
     assert is_binary(result.correlation_id)
@@ -53,10 +56,12 @@ defmodule NxQuantum.ProviderBridgeTest do
   test "submit_job/3 accepts explicit correlation and idempotency contract fields" do
     assert {:ok, submitted} =
              ProviderBridge.submit_job(InMemory, %{circuit_id: "c2"},
+               request_id: "req_external_123",
                correlation_id: "corr_external_123",
                idempotency_key: "idem_external_123"
              )
 
+    assert submitted.request_id == "req_external_123"
     assert submitted.correlation_id == "corr_external_123"
     assert submitted.idempotency_key == "idem_external_123"
     assert submitted.metadata.contract_schema_version == :v1

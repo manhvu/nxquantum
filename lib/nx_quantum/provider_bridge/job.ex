@@ -11,6 +11,7 @@ defmodule NxQuantum.ProviderBridge.Job do
     :target,
     :submitted_at,
     :schema_version,
+    :request_id,
     :correlation_id,
     :idempotency_key,
     metadata: %{}
@@ -25,6 +26,7 @@ defmodule NxQuantum.ProviderBridge.Job do
           target: String.t(),
           submitted_at: String.t() | nil,
           schema_version: atom() | nil,
+          request_id: String.t() | nil,
           correlation_id: String.t() | nil,
           idempotency_key: String.t() | nil,
           metadata: map()

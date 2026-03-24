@@ -11,6 +11,7 @@ defmodule NxQuantum.ProviderBridge.Result do
     :target,
     :payload,
     :schema_version,
+    :request_id,
     :correlation_id,
     :idempotency_key,
     metadata: %{}
@@ -23,6 +24,7 @@ defmodule NxQuantum.ProviderBridge.Result do
           target: String.t(),
           payload: map(),
           schema_version: atom() | nil,
+          request_id: String.t() | nil,
           correlation_id: String.t() | nil,
           idempotency_key: String.t() | nil,
           metadata: map()

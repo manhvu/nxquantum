@@ -22,6 +22,7 @@ defmodule NxQuantum.ProviderBridge.Serialization do
       "provider" => provider_value(job.provider),
       "target" => job.target,
       "submitted_at" => job.submitted_at,
+      "request_id" => job.request_id,
       "correlation_id" => job.correlation_id,
       "idempotency_key" => job.idempotency_key,
       "metadata" => stringify_keys(job.metadata || %{})
@@ -36,6 +37,7 @@ defmodule NxQuantum.ProviderBridge.Serialization do
       "state" => to_string(result.state),
       "provider" => provider_value(result.provider),
       "target" => result.target,
+      "request_id" => result.request_id,
       "correlation_id" => result.correlation_id,
       "idempotency_key" => result.idempotency_key,
       "payload" => stringify_keys(result.payload || %{}),
@@ -54,6 +56,7 @@ defmodule NxQuantum.ProviderBridge.Serialization do
       "state" => stringify_value(error.state),
       "capability" => stringify_value(error.capability),
       "response" => stringify_value(error.response),
+      "request_id" => error.request_id,
       "correlation_id" => error.correlation_id,
       "idempotency_key" => error.idempotency_key,
       "metadata" => stringify_keys(error.metadata || %{})

@@ -13,6 +13,7 @@ defmodule NxQuantum.ProviderBridge.ProviderError do
     :response,
     :capability,
     :schema_version,
+    :request_id,
     :correlation_id,
     :idempotency_key,
     metadata: %{}
@@ -36,6 +37,7 @@ defmodule NxQuantum.ProviderBridge.ProviderError do
           response: term() | nil,
           capability: atom() | nil,
           schema_version: atom() | nil,
+          request_id: String.t() | nil,
           correlation_id: String.t() | nil,
           idempotency_key: String.t() | nil,
           metadata: map()
