@@ -34,9 +34,8 @@ defmodule NxQuantum.Adapters.Providers.Common.LiveTransport do
 
   defp do_http(provider, operation, payload, opts) do
     with {:ok, url} <- endpoint_url(operation, opts),
-         {:ok, body} <- encode_body(%{provider: provider, operation: operation, payload: payload}),
-         {:ok, response} <- http_post(url, body, opts) do
-      decode_response(response)
+         {:ok, response} <- http_post(url, %{provider: provider, operation: operation, payload: payload}, opts) do
+      {:ok, stringify_map(response)}
     end
   end
 
@@ -55,42 +54,19 @@ defmodule NxQuantum.Adapters.Providers.Common.LiveTransport do
     end
   end
 
-  defp encode_body(map), do: {:ok, :erlang.term_to_binary(stringify_map(map), [:deterministic])}
+  defp http_post(url, payload, opts) do
+    case Keyword.get(opts, :live_http_fun) do
+      fun when is_function(fun, 3) ->
+        case fun.(url, payload, opts) do
+          {:ok, %{} = response} -> {:ok, response}
+          {:error, reason} -> {:error, reason}
+          other -> {:error, {:provider_invalid_response, other}}
+        end
 
-  defp decode_response({status, raw_body}) when is_integer(status) and status in 200..299 do
-    {:ok, raw_body |> :erlang.binary_to_term() |> stringify_map()}
-  rescue
-    _ -> {:error, {:provider_invalid_response, :live_transport_decode_failed}}
-  end
-
-  defp decode_response({status, _raw_body}) when status in [401, 403], do: {:error, {:provider_auth_error, :unauthorized}}
-
-  defp decode_response({429, _raw_body}), do: {:error, {:provider_rate_limited, :rate_limited}}
-  defp decode_response({status, raw_body}), do: {:error, {:provider_transport_error, {:http_status, status, raw_body}}}
-
-  defp http_post(url, body, opts) do
-    headers =
-      opts
-      |> Keyword.get(:provider_config, %{})
-      |> auth_header()
-      |> then(&[{"content-type", "application/octet-stream"} | &1])
-
-    request = {String.to_charlist(url), headers, ~c"application/octet-stream", body}
-    timeout = Keyword.get(opts, :live_timeout_ms, 5_000)
-    http_opts = [timeout: timeout]
-
-    :inets.start()
-    :ssl.start()
-
-    case :httpc.request(:post, request, http_opts, body_format: :binary) do
-      {:ok, {{_http_version, status, _reason}, _resp_headers, resp_body}} -> {:ok, {status, resp_body}}
-      {:error, reason} -> {:error, {:provider_transport_error, reason}}
+      _ ->
+        {:error, {:provider_transport_error, :missing_live_http_fun}}
     end
   end
-
-  defp auth_header(%{auth_token: token}) when is_binary(token), do: [{"authorization", "Bearer " <> token}]
-  defp auth_header(%{api_key: key}) when is_binary(key), do: [{"x-api-key", key}]
-  defp auth_header(_), do: []
 
   defp default_state(:submit), do: "SUBMITTED"
   defp default_state(:poll), do: "COMPLETED"

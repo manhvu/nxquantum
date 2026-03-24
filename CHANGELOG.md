@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.8.0] - 2026-03-24
+
+### Added
+
+- Provider transport contract now includes explicit `:live` mode with deterministic envelope parity (`schema_version`, `request_id`, `correlation_id`, `idempotency_key`).
+- Live transport adapter seam for provider lifecycle operations and replay fixture capture tooling for deterministic regression lanes.
+- Compiler target contract (`NxQuantum.Compiler.Target`) and additive `compile/2` diagnostics contract with optimization/routing/scheduling/cost-profile reporting.
+- Observability metadata policy and troubleshooting bundle export contract for machine-consumable incident evidence.
+- High-value performance matrix scripts, deterministic dataset manifests, and CI guard tests for scenario and provider-lifecycle latency coverage.
+
+### Improved
+
+- Provider bridge envelope contracts include versioned `request_id` serialization across job/result/error payloads.
+- Feature-step coverage now includes Phase 18 matrix scenarios `baseline_2q` and `deep_6q`.
+- HexDocs extras include v0.8 and v0.9 milestone evidence docs.
+
+### References
+
+- [docs/v0.8-feature-spec.md](docs/v0.8-feature-spec.md)
+- [docs/v0.8-provider-live-execution-plan.md](docs/v0.8-provider-live-execution-plan.md)
+- [docs/v0.8-provider-capability-matrix.md](docs/v0.8-provider-capability-matrix.md)
+- [docs/v0.8-compiler-implementation-plan.md](docs/v0.8-compiler-implementation-plan.md)
+- [docs/v0.9-high-value-performance-matrix.md](docs/v0.9-high-value-performance-matrix.md)
+
 ## [0.7.0] - 2026-03-23
 
 ### Added

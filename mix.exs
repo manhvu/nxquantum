@@ -1,7 +1,7 @@
 defmodule NxQuantum.MixProject do
   use Mix.Project
 
-  @version "0.7.0"
+  @version "0.8.0"
   @source_url "https://github.com/diogenes/nxquantum"
 
   def project do
@@ -22,7 +22,7 @@ defmodule NxQuantum.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :inets, :ssl]
     ]
   end
 
