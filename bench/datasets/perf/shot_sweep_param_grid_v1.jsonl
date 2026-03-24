@@ -1,0 +1,6 @@
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.10,"phi":0.20,"shots":256,"seed":20260323}
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.10,"phi":0.20,"shots":1024,"seed":20260323}
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.10,"phi":0.20,"shots":4096,"seed":20260323}
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.30,"phi":0.40,"shots":256,"seed":20260323}
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.30,"phi":0.40,"shots":1024,"seed":20260323}
+{"grid_id":"shot_sweep_param_grid_v1","theta":0.30,"phi":0.40,"shots":4096,"seed":20260323}

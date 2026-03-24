@@ -1,0 +1,10 @@
+{
+  "dataset_id": "shot_sweep_param_grid_v1",
+  "schema_version": "v1",
+  "seed": 20260323,
+  "sha256": "071376272ba4fef8006821bb7afce4deabdd0bb43274ce6b7e053475fe4bb13c",
+  "grid_id": "shot_sweep_param_grid_v1",
+  "parameter_count": 2,
+  "sweep_seed": 20260323,
+  "shot_tiers": [256, 1024, 4096]
+}

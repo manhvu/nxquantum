@@ -89,3 +89,24 @@ Planned benchmark scripts:
 - `bench/hybrid_quantum_ai_benchmark.exs`
 - `bench/hybrid_quantum_ai_baseline.exs`
 - `bench/hybrid_quantum_ai_report.exs`
+
+## Phase 18 High-Value Performance Matrix
+
+Run deterministic high-value simulation scenarios:
+
+```bash
+mise exec -- mix run bench/high_value_performance_matrix.exs baseline_2q 200
+mise exec -- mix run bench/high_value_performance_matrix.exs deep_6q 200
+mise exec -- mix run bench/high_value_performance_matrix.exs state_reuse_8q_xy 200
+mise exec -- mix run bench/high_value_performance_matrix.exs batch_obs_8q 200
+mise exec -- mix run bench/high_value_performance_matrix.exs sampled_counts_sparse_terms 200
+mise exec -- mix run bench/high_value_performance_matrix.exs shot_sweep_param_grid_v1 200
+```
+
+Provider lifecycle latency lanes:
+
+```bash
+mise exec -- mix run bench/provider_lifecycle_latency_fixture.exs 100
+mise exec -- mix run bench/provider_lifecycle_latency_live.exs live_smoke 20
+mise exec -- mix run bench/provider_lifecycle_latency_live.exs live 20
+```

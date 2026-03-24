@@ -6,6 +6,8 @@ defmodule NxQuantum.Features.Steps.HighValuePerformanceMatrixSteps do
   alias NxQuantum.Features.Steps.RoadmapContractSteps
 
   @scenario_ids [
+    "baseline_2q",
+    "deep_6q",
     "state_reuse_8q_xy",
     "batch_obs_8q",
     "sampled_counts_sparse_terms",
