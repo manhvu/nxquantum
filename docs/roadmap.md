@@ -395,8 +395,8 @@ Scenario closure tracker (as of March 23, 2026):
 1. `[x]` repeated expectation on reused states (`state_reuse_8q_xy`) exists in python-comparison harness.
 2. `[x]` multi-observable batch estimation (`batch_obs_8q`) exists with regression guard.
 3. `[x]` sampled-count sparse reductions (`sampled_counts_sparse_terms`) exists in python-comparison harness.
-4. `[ ]` shot-heavy parameter sweeps need a formal dataset + matrix scenario + CI guard.
-5. `[ ]` provider lifecycle live-lane latency (`submit/poll/cancel/fetch_result`) needs benchmark script and release evidence lane.
+4. `[x]` shot-heavy parameter sweeps need a formal dataset + matrix scenario + CI guard.
+5. `[x]` provider lifecycle live-lane latency (`submit/poll/cancel/fetch_result`) needs benchmark script and release evidence lane.
 
 Milestone V review gate (v0.9 readiness):
 
@@ -419,7 +419,7 @@ Every unfinished roadmap phase (currently Phase 14 onward) must include:
 2. `Implementation deliverables` section (concrete modules/files/features/tests/docs).
 3. Review gate with deterministic evidence criteria.
 
-## Phase 19 - v1.0 P0: Quantum AI Tool Interface Contracts
+## Phase 19 - v0.9 P2: Quantum AI Tool Interface Contracts
 
 Goal:
 
@@ -446,7 +446,7 @@ Implementation deliverables:
    - `lib/nx_quantum/adapters/ai_tool_transport/mcp_json_rpc_sync.ex`
    - `lib/nx_quantum/adapters/ai_tool_transport/cloud_events_async.ex`
 6. Publish docs and runnable examples:
-   - `docs/v1.0-quantum-ai-tool-contracts.md`
+   - `docs/v0.9-quantum-ai-tool-contracts.md`
 
 Milestone W review gate (before Phase 20):
 
@@ -456,7 +456,7 @@ Milestone W review gate (before Phase 20):
 4. Sync and async transport paths are both defined behind stable ports/adapters.
 5. Docs/examples are executable and aligned with public APIs.
 
-## Phase 20 - v1.0 P1: Hybrid Quantum AI Evaluation and Benchmark Pack
+## Phase 20 - v0.9 P3: Hybrid Quantum AI Evaluation and Benchmark Pack
 
 Goal:
 
@@ -475,7 +475,7 @@ Implementation deliverables:
 3. Add CI-reportable benchmark gate checks:
    - `test/nx_quantum/hybrid_quantum_ai_benchmark_guard_test.exs`
 4. Publish benchmark evidence and integration guide:
-   - `docs/v1.0-hybrid-quantum-ai-benchmark.md`
+   - `docs/v0.9-hybrid-quantum-ai-benchmark.md`
    - `docs/v1.0-hybrid-quantum-ai-integration-guide.md`
 
 Milestone X review gate (before Phase 21):
@@ -485,7 +485,7 @@ Milestone X review gate (before Phase 21):
 3. Fallback and failure-path behavior is measured and documented.
 4. Evidence is sufficient for migration-go/no-go decisions.
 
-## Phase 21 - v1.0 P2: Quantum AI Production Promotion Gates
+## Phase 21 - v0.9 P4: Quantum AI Production Promotion Gates
 
 Goal:
 
@@ -510,9 +510,9 @@ Implementation deliverables:
    - `test/features/steps/quantum_ai_rollout_gates_steps.ex`
    - `test/nx_quantum/migration/ai_gates_test.exs`
 5. Publish production rollout playbook:
-   - `docs/v1.0-quantum-ai-rollout-playbook.md`
+   - `docs/v0.9-quantum-ai-rollout-playbook.md`
 
-Milestone Y review gate (v1.0 readiness):
+Milestone Y review gate (v0.9 readiness):
 
 1. Hybrid AI promotion decisions are deterministic, typed, and CI-friendly.
 2. Observability provides enough context to isolate quantum-vs-classical path failures.
