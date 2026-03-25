@@ -65,15 +65,18 @@ defmodule NxQuantum.Runtime.Detection do
 
     if module_loaded?(exla_client_module) and function_exported?(exla_client_module, :fetch!, 1) and
          exla_platform_supported?(client) do
-      case safe_fetch_exla_client(client) do
-        {:ok, _client} -> true
-        :ok -> true
-        _ -> false
-      end
+      client
+      |> safe_fetch_exla_client()
+      |> successful_fetch_result?()
     else
       false
     end
   end
+
+  defp successful_fetch_result?({:ok, _client}), do: true
+  defp successful_fetch_result?(:ok), do: true
+  defp successful_fetch_result?(%_{}), do: true
+  defp successful_fetch_result?(_), do: false
 
   defp exla_platform_supported?(platform) do
     exla_client_module = exla_client_module()

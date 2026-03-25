@@ -46,6 +46,36 @@ defmodule NxQuantum.RuntimeTest do
       refute :nvidia_gpu_compiled in ids
       refute :torch_interop_runtime in ids
     end
+
+    test "cpu_compiled detection treats successful EXLA host fetch as available" do
+      cond do
+        not Code.ensure_loaded?(:"Elixir.EXLA.Client") ->
+          :ok
+
+        not function_exported?(:"Elixir.EXLA.Client", :fetch!, 1) ->
+          :ok
+
+        true ->
+          host_fetchable =
+            try do
+              case :erlang.apply(:"Elixir.EXLA.Client", :fetch!, [:host]) do
+                {:ok, _client} -> true
+                :ok -> true
+                client when is_map(client) -> true
+                _ -> false
+              end
+            rescue
+              _ -> false
+            catch
+              :exit, _reason -> false
+              _kind, _reason -> false
+            end
+
+          if host_fetchable do
+            assert NxQuantum.Runtime.Detection.default_profile_available?(:cpu_compiled)
+          end
+      end
+    end
   end
 
   describe "resolve/2" do
