@@ -140,6 +140,53 @@ defmodule NxQuantum.EstimatorTest do
       assert {:error, %{code: :invalid_measurement_wire}} =
                Estimator.run(circuit, observables: [:pauli_z], wire: -1)
     end
+
+    test "runtime_profile auto prefers portable for fused-single-wire batch workloads" do
+      circuit =
+        [qubits: 4]
+        |> Circuit.new()
+        |> Gates.h(0)
+        |> Gates.cnot(control: 0, target: 1)
+        |> Gates.cnot(control: 1, target: 2)
+        |> Gates.cnot(control: 2, target: 3)
+
+      cycle = [:pauli_x, :pauli_y, :pauli_z]
+
+      observables =
+        Enum.map(0..23, fn index ->
+          Enum.at(cycle, rem(index, 3))
+        end)
+
+      assert {:ok, %Result{} = result} =
+               Estimator.run(circuit,
+                 observables: observables,
+                 wire: 0,
+                 runtime_profile: :auto,
+                 capabilities: %{cpu_compiled: true, cpu_portable: true}
+               )
+
+      assert result.metadata.runtime_profile == :cpu_portable
+      assert result.metadata.runtime_selection.requested_profile == :auto
+      assert result.metadata.runtime_selection.selected_profile == :cpu_portable
+      assert result.metadata.runtime_selection.reason == :portable_preferred_fused_single_wire_batch
+    end
+
+    test "runtime_profile auto prefers compiled for general deterministic workloads" do
+      circuit = Circuit.new(qubits: 1)
+
+      assert {:ok, %Result{} = result} =
+               Estimator.run(circuit,
+                 observables: [:pauli_z],
+                 wire: 0,
+                 runtime_profile: :auto,
+                 capabilities: %{cpu_compiled: true, cpu_portable: true}
+               )
+
+      assert result.metadata.runtime_profile == :cpu_compiled
+      assert result.metadata.runtime_selection.requested_profile == :auto
+      assert result.metadata.runtime_selection.selected_profile == :cpu_compiled
+      assert result.metadata.runtime_selection.reason == :compiled_preferred_general
+    end
   end
 
   describe "batched_expectation/3" do

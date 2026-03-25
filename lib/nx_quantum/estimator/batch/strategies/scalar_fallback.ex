@@ -5,14 +5,26 @@ defmodule NxQuantum.Estimator.Batch.Strategies.ScalarFallback do
 
   alias NxQuantum.Circuit
   alias NxQuantum.Estimator.ResultBuilder
+  alias NxQuantum.Estimator.RuntimeProfile
   alias NxQuantum.Estimator.Scalar
 
   @impl true
   @spec run(Circuit.t(), [map()], keyword()) :: {:ok, NxQuantum.Estimator.Result.t()} | {:error, map()}
   def run(circuit, observable_specs, opts) do
-    observable_specs
-    |> scalar_results(circuit, opts)
-    |> to_batch_result(observable_specs, opts)
+    with {:ok, selection} <-
+           RuntimeProfile.resolve_with_context(
+             opts,
+             kind: :batch,
+             qubits: circuit.qubits,
+             observable_specs: observable_specs
+           ) do
+      resolved_opts = RuntimeProfile.apply_selection_metadata(opts, selection)
+      scalar_opts = Keyword.put(resolved_opts, :runtime_profile, selection.selected_profile)
+
+      observable_specs
+      |> scalar_results(circuit, scalar_opts)
+      |> to_batch_result(observable_specs, resolved_opts)
+    end
   end
 
   defp scalar_results(observable_specs, circuit, opts) do

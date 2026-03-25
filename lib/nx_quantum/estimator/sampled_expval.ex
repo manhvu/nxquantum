@@ -2,6 +2,7 @@ defmodule NxQuantum.Estimator.SampledExpval do
   @moduledoc false
 
   alias NxQuantum.Estimator.ObservableSpecs
+  alias NxQuantum.Estimator.RuntimeProfile
   alias NxQuantum.Estimator.SampledExpval.CountsReducer
   alias NxQuantum.Estimator.SampledExpval.MaskLookupCache
   alias NxQuantum.Estimator.SampledExpval.ParsedCounts
@@ -42,8 +43,9 @@ defmodule NxQuantum.Estimator.SampledExpval do
   defp evaluate_targets(parsed, {:observable_specs, observable_specs}, opts) do
     with {:ok, terms} <- observable_terms(observable_specs) do
       with :ok <- ensure_diagonal_terms(terms),
-           :ok <- ensure_real_coefficients(terms) do
-        values = evaluate_terms(parsed, terms, opts)
+           :ok <- ensure_real_coefficients(terms),
+           {:ok, runtime_opts} <- apply_sampled_runtime_selection(parsed, terms, opts) do
+        values = evaluate_terms(parsed, terms, runtime_opts)
         tensor = Nx.tensor(values, type: {:f, 32})
 
         if length(values) == 1 do
@@ -59,8 +61,9 @@ defmodule NxQuantum.Estimator.SampledExpval do
     terms = sparse_pauli.terms
 
     with :ok <- ensure_diagonal_terms(terms),
-         :ok <- ensure_real_coefficients(terms) do
-      value = evaluate_sparse_sum(parsed, terms, opts)
+         :ok <- ensure_real_coefficients(terms),
+         {:ok, runtime_opts} <- apply_sampled_runtime_selection(parsed, terms, opts) do
+      value = evaluate_sparse_sum(parsed, terms, runtime_opts)
       {:ok, Nx.tensor(value, type: {:f, 32})}
     end
   end
@@ -98,6 +101,51 @@ defmodule NxQuantum.Estimator.SampledExpval do
   defp z_mask_expectation_lookup(parsed, terms, opts) do
     %{unique_masks: unique_masks} = MaskLookupCache.for_terms(terms, opts)
     CountsReducer.lookup(parsed, unique_masks, opts)
+  end
+
+  defp apply_sampled_runtime_selection(parsed, terms, opts) do
+    runtime_profile =
+      case Keyword.get(opts, :runtime_profile, :cpu_portable) do
+        %{id: id} when is_atom(id) -> id
+        id when is_atom(id) -> id
+        _ -> :cpu_portable
+      end
+
+    if runtime_profile == :auto do
+      sampled_unit_count =
+        terms
+        |> Enum.map(& &1.z_mask)
+        |> Enum.uniq()
+        |> length()
+
+      with {:ok, selection} <-
+             RuntimeProfile.resolve_with_context(
+               opts,
+               kind: :sampled,
+               sampled_unit_count: sampled_unit_count,
+               sampled_entry_count: parsed.entry_count
+             ) do
+        runtime_opts =
+          opts
+          |> RuntimeProfile.apply_selection_metadata(selection)
+          |> maybe_set_sampled_mode(selection.selected_profile)
+
+        {:ok, runtime_opts}
+      end
+    else
+      {:ok, opts}
+    end
+  end
+
+  defp maybe_set_sampled_mode(opts, selected_profile) do
+    if Keyword.has_key?(opts, :sampled_parallel_mode) do
+      opts
+    else
+      case selected_profile do
+        :cpu_portable -> Keyword.put(opts, :sampled_parallel_mode, :force_scalar)
+        _ -> opts
+      end
+    end
   end
 
   defp ensure_diagonal_terms(terms) do

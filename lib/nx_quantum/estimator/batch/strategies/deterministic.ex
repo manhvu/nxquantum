@@ -10,20 +10,37 @@ defmodule NxQuantum.Estimator.Batch.Strategies.Deterministic do
 
   @impl true
   @spec run(Circuit.t(), [map()], keyword()) :: {:ok, NxQuantum.Estimator.Result.t()} | {:error, map()}
-  def run(_circuit, [], opts) do
-    {:ok, ResultBuilder.build(Nx.tensor([], type: {:f, 32}), [], opts)}
+  def run(circuit, [], opts) do
+    with {:ok, selection} <-
+           RuntimeProfile.resolve_with_context(
+             opts,
+             kind: :batch,
+             qubits: circuit.qubits,
+             observable_specs: []
+           ) do
+      result_opts = RuntimeProfile.apply_selection_metadata(opts, selection)
+      {:ok, ResultBuilder.build(Nx.tensor([], type: {:f, 32}), [], result_opts)}
+    end
   end
 
   def run(circuit, observable_specs, opts) do
     measured_circuit = %{circuit | measurement: hd(observable_specs)}
 
-    with {:ok, profile} <- RuntimeProfile.resolve(opts) do
+    with {:ok, selection} <-
+           RuntimeProfile.resolve_with_context(
+             opts,
+             kind: :batch,
+             qubits: circuit.qubits,
+             observable_specs: observable_specs
+           ) do
+      result_opts = RuntimeProfile.apply_selection_metadata(opts, selection)
+
       values =
         measured_circuit
-        |> ExecuteCircuit.expectations(observable_specs, [runtime_profile: profile] ++ opts)
+        |> ExecuteCircuit.expectations(observable_specs, [runtime_profile: selection.profile] ++ result_opts)
         |> Nx.as_type({:f, 32})
 
-      {:ok, ResultBuilder.build(values, observable_specs, opts)}
+      {:ok, ResultBuilder.build(values, observable_specs, result_opts)}
     end
   end
 end

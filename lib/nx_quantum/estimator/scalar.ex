@@ -11,8 +11,9 @@ defmodule NxQuantum.Estimator.Scalar do
   @spec run(Circuit.t(), keyword()) :: {:ok, Nx.Tensor.t()} | {:error, map()}
   def run(%Circuit{} = circuit, opts) do
     with {:ok, measured_circuit} <- Measurement.apply(circuit, opts),
-         {:ok, profile} <- RuntimeProfile.resolve(opts) do
-      tensor = ExecuteCircuit.expectation(measured_circuit, [runtime_profile: profile] ++ opts)
+         {:ok, selection} <- RuntimeProfile.resolve_with_context(opts, kind: :scalar, qubits: measured_circuit.qubits) do
+      simulator_opts = [runtime_profile: selection.profile] ++ opts
+      tensor = ExecuteCircuit.expectation(measured_circuit, simulator_opts)
 
       if ExecutionMode.stochastic?(opts) do
         estimated =

@@ -573,3 +573,39 @@ Milestone Y review gate (v0.9 readiness):
 
 1. Additional provider-native analog/non-gate-model workflow support remains unscheduled beyond v0.9.
 2. End-to-end quantum-native LLM architecture research remains outside short-to-medium execution scope and is tracked in `docs/quantum-llm-vision.md`.
+
+## v0.9.1 Follow-up Hardening (Phase D1-D4)
+
+Release target: `v0.9.1` (additive hardening; no stable contract breakage).
+
+### Phase D1 - Runtime Auto-Selection (Opt-in, Estimator-first)
+
+1. `[x]` Add `runtime_profile: :auto` support to estimator runtime resolution paths.
+2. `[x]` Implement deterministic auto-lane chooser:
+   - portable preferred for fused single-wire batch observable shapes;
+   - portable preferred for sampled scalar-small workloads;
+   - otherwise compiled preferred with deterministic portable fallback.
+3. `[x]` Expose requested/resolved runtime selection reason in estimator result metadata.
+4. `[x]` Strategic Refactoring pass + full development-flow gates + D1 commit.
+
+### Phase D2 - Compiled Fused Kernel Cost Reduction
+
+1. `[ ]` Cache/reuse compiled fused per-wire tensor scaffolding (`indices`/mask-derived scaffolding) by qubits+wire.
+2. `[ ]` Preserve portable/compiled numeric parity under strict tolerances.
+3. `[ ]` Keep fused eligibility/fallback behavior unchanged.
+4. `[ ]` Strategic Refactoring pass + full development-flow gates + D2 commit.
+
+### Phase D3 - Cache Policy + Hot/Cold Matrix
+
+1. `[ ]` Upgrade evolved-state cache with byte-aware cap + TTL + deterministic oldest-first eviction.
+2. `[ ]` Preserve `cache_evolved_state: false` bypass behavior.
+3. `[ ]` Add hot/cold cache modes in benchmark harness (`hot` default).
+4. `[ ]` Produce/report both modes for key scenarios (`batch_obs_8q`, `sampled_counts_sparse_terms`, `deep_6q`).
+5. `[ ]` Strategic Refactoring pass + full development-flow gates + D3 commit.
+
+### Phase D4 - Observability + CI Guard Tightening
+
+1. `[ ]` Add estimator strategy observability metadata (requested/resolved profile, strategy tags, cache status, selection reason).
+2. `[ ]` Add blocking hot-lane guard for `batch_obs_8q` and non-blocking cold-lane artifact/report validation.
+3. `[ ]` Update docs/roadmap evidence with dual-lane results and guard semantics.
+4. `[ ]` Strategic Refactoring pass + full development-flow gates + D4 commit.
