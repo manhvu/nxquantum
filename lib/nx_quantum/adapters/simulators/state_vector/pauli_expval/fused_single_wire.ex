@@ -3,6 +3,9 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval.FusedSingleWire 
 
   import Bitwise
 
+  defguardp unit_scale(scale) when abs(scale - 1.0) < 1.0e-12
+  defguardp neg_unit_scale(scale) when abs(scale + 1.0) < 1.0e-12
+
   @type prepared_term :: map()
 
   @spec eligible?([prepared_term()], pos_integer()) :: boolean()
@@ -46,6 +49,24 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval.FusedSingleWire 
     end)
   end
 
+  @spec expectations_for_runtime(Nx.Tensor.t(), [prepared_term()], pos_integer(), keyword()) ::
+          [Nx.Tensor.t()]
+  def expectations_for_runtime(%Nx.Tensor{} = state, terms, qubits, opts \\ []) do
+    case kernel_for_runtime(opts) do
+      :compiled -> expectations_compiled(state, terms, qubits)
+      :portable -> expectations(state, terms, qubits)
+    end
+  end
+
+  @spec kernel_for_runtime(keyword()) :: :portable | :compiled
+  def kernel_for_runtime(opts \\ []) do
+    case runtime_profile_id(opts) do
+      :cpu_compiled -> :compiled
+      :nvidia_gpu_compiled -> :compiled
+      _ -> :portable
+    end
+  end
+
   defp z_by_wire(amps, qubits, dim) do
     Enum.reduce(0..(qubits - 1), %{}, fn wire, acc ->
       mask = 1 <<< wire
@@ -87,7 +108,58 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval.FusedSingleWire 
   defp complex_components({re, im}) when is_number(re) and is_number(im), do: {re * 1.0, im * 1.0}
   defp complex_components(value) when is_number(value), do: {value * 1.0, 0.0}
 
-  defp apply_scale(value, scale) when abs(scale - 1.0) < 1.0e-12, do: value
-  defp apply_scale(value, scale) when abs(scale + 1.0) < 1.0e-12, do: -value
+  defp apply_scale(value, scale) when unit_scale(scale), do: value
+  defp apply_scale(value, scale) when neg_unit_scale(scale), do: -value
   defp apply_scale(value, scale), do: value * scale
+
+  defp expectations_compiled(%Nx.Tensor{} = state, terms, qubits) do
+    dim = 1 <<< qubits
+    indices = Nx.iota({dim}, type: {:u, 64})
+    probabilities = state |> Nx.multiply(Nx.conjugate(state)) |> Nx.real() |> Nx.as_type({:f, 64})
+    wires = terms |> Enum.map(& &1.wire) |> Enum.uniq()
+
+    wire_values =
+      Enum.reduce(wires, %{}, fn wire, acc ->
+        mask = Nx.tensor(1 <<< wire, type: {:u, 64})
+        zeros = Nx.equal(Nx.bitwise_and(indices, mask), Nx.tensor(0, type: {:u, 64}))
+        selector = Nx.select(zeros, Nx.tensor(1.0, type: {:f, 64}), Nx.tensor(0.0, type: {:f, 64}))
+        signs = Nx.select(zeros, Nx.tensor(1.0, type: {:f, 64}), Nx.tensor(-1.0, type: {:f, 64}))
+        flipped = Nx.take(state, Nx.bitwise_xor(indices, mask))
+        overlap = Nx.multiply(Nx.conjugate(state), flipped)
+
+        x = Nx.multiply(2.0, Nx.sum(Nx.multiply(Nx.real(overlap), selector)))
+        y = Nx.multiply(2.0, Nx.sum(Nx.multiply(Nx.imag(overlap), selector)))
+        z = Nx.sum(Nx.multiply(probabilities, signs))
+
+        Map.put(acc, wire, %{x: x, y: y, z: z})
+      end)
+
+    tensor_by_term =
+      Enum.reduce(terms, %{}, fn %{term_key: term_key, kind: kind, wire: wire, scale: scale}, acc ->
+        Map.put_new_lazy(acc, term_key, fn ->
+          base =
+            case kind do
+              :pauli_x -> Map.fetch!(wire_values, wire).x
+              :pauli_y -> Map.fetch!(wire_values, wire).y
+              :pauli_z -> Map.fetch!(wire_values, wire).z
+            end
+
+          apply_scale_tensor(base, scale)
+        end)
+      end)
+
+    Enum.map(terms, fn %{term_key: term_key} -> Map.fetch!(tensor_by_term, term_key) end)
+  end
+
+  defp apply_scale_tensor(value, scale) when unit_scale(scale), do: value
+  defp apply_scale_tensor(value, scale) when neg_unit_scale(scale), do: Nx.negate(value)
+  defp apply_scale_tensor(value, scale), do: Nx.multiply(value, scale)
+
+  defp runtime_profile_id(opts) do
+    case Keyword.get(opts, :runtime_profile) do
+      %{id: id} when is_atom(id) -> id
+      id when is_atom(id) -> id
+      _ -> nil
+    end
+  end
 end

@@ -43,7 +43,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector do
         if Enum.all?(maybe_bitmask_terms, &is_map/1) do
           maybe_bitmask_terms
           |> PauliExpval.plan(circuit.qubits, opts)
-          |> then(&PauliExpval.expectations_with_plan(state, &1))
+          |> then(&PauliExpval.expectations_with_plan(state, &1, opts))
         else
           Enum.map(observable_specs, fn %{observable: observable, wire: wire} ->
             expectation_for_observable(state, observable, wire, circuit.qubits)

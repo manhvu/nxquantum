@@ -35,7 +35,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
 
   def expectations(%Nx.Tensor{} = state, terms, qubits, opts) do
     plan = plan(terms, qubits, opts)
-    expectations_with_plan(state, plan)
+    expectations_with_plan(state, plan, opts)
   end
 
   @spec plan([pauli_term()], pos_integer(), keyword()) :: expectation_plan()
@@ -45,9 +45,14 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
   end
 
   @spec expectations_with_plan(Nx.Tensor.t(), expectation_plan()) :: [Nx.Tensor.t()]
-  def expectations_with_plan(_state, %ExpectationPlan{terms: []}), do: []
-
   def expectations_with_plan(%Nx.Tensor{} = state, %ExpectationPlan{} = plan) do
+    expectations_with_plan(state, plan, [])
+  end
+
+  @spec expectations_with_plan(Nx.Tensor.t(), expectation_plan(), keyword()) :: [Nx.Tensor.t()]
+  def expectations_with_plan(_state, %ExpectationPlan{terms: []}, _opts), do: []
+
+  def expectations_with_plan(%Nx.Tensor{} = state, %ExpectationPlan{} = plan, opts) do
     case plan.strategy.mode do
       :parallel ->
         plan.terms
@@ -69,7 +74,7 @@ defmodule NxQuantum.Adapters.Simulators.StateVector.PauliExpval do
 
       :scalar ->
         if FusedSingleWire.eligible?(plan.terms, plan.qubits) do
-          FusedSingleWire.expectations(state, plan.terms, plan.qubits)
+          FusedSingleWire.expectations_for_runtime(state, plan.terms, plan.qubits, opts)
         else
           evaluate_scalar_with_memo(state, plan)
         end
