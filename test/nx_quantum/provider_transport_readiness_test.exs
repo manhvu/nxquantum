@@ -1,23 +1,18 @@
 defmodule NxQuantum.ProviderTransportReadinessTest do
   use ExUnit.Case, async: false
 
-  alias NxQuantum.Adapters.Providers.AwsBraket
-  alias NxQuantum.Adapters.Providers.AzureQuantum
   alias NxQuantum.Adapters.Providers.Common.TransportSupport
   alias NxQuantum.Adapters.Providers.IBMRuntime
   alias NxQuantum.ProviderBridge
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   setup do
-    keys = [
-      "NXQ_PROVIDER_LIVE",
-      "NXQ_PROVIDER_LIVE_IBM_RUNTIME",
-      "NXQ_PROVIDER_LIVE_AWS_BRAKET",
-      "NXQ_PROVIDER_LIVE_AZURE_QUANTUM",
-      "NXQ_PROVIDER_LIVE_SMOKE",
-      "NXQ_PROVIDER_LIVE_SMOKE_IBM_RUNTIME",
-      "NXQ_PROVIDER_LIVE_SMOKE_AWS_BRAKET",
-      "NXQ_PROVIDER_LIVE_SMOKE_AZURE_QUANTUM"
-    ]
+    provider_ids = :transport_readiness |> ProviderMatrix.entries_for() |> Enum.map(& &1.id)
+
+    live_keys = Enum.map(provider_ids, &"NXQ_PROVIDER_LIVE_#{provider_name(&1)}")
+    live_smoke_keys = Enum.map(provider_ids, &"NXQ_PROVIDER_LIVE_SMOKE_#{provider_name(&1)}")
+
+    keys = ["NXQ_PROVIDER_LIVE", "NXQ_PROVIDER_LIVE_SMOKE" | live_keys ++ live_smoke_keys]
 
     snapshot = Map.new(keys, fn key -> {key, System.get_env(key)} end)
 
@@ -148,35 +143,10 @@ defmodule NxQuantum.ProviderTransportReadinessTest do
 
     payload = %{workflow: :sampler, shots: 64}
 
-    for {provider, opts} <- [
-          {IBMRuntime,
-           [
-             transport_mode: :live_smoke,
-             target: "ibm_backend_simulator",
-             provider_config: %{auth_token: "token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
-           ]},
-          {AwsBraket,
-           [
-             transport_mode: :live_smoke,
-             target: "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-             provider_config: %{
-               region: "us-east-1",
-               credentials_profile: "default",
-               device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-             }
-           ]},
-          {AzureQuantum,
-           [
-             transport_mode: :live_smoke,
-             target: "azure.quantum.sim",
-             provider_config: %{
-               workspace: "ws-1",
-               auth_context: "managed_identity",
-               target_id: "azure.quantum.sim",
-               provider_name: "microsoft"
-             }
-           ]}
-        ] do
+    for entry <- ProviderMatrix.entries_for(:transport_readiness) do
+      provider = entry.adapter
+      opts = [transport_mode: :live_smoke, target: entry.target, provider_config: entry.provider_config]
+
       assert {:ok, readiness} = provider.transport_readiness(opts)
       assert readiness.mode == :live_smoke
       assert readiness.live_smoke.ready?
@@ -211,4 +181,6 @@ defmodule NxQuantum.ProviderTransportReadinessTest do
 
     assert submitted.metadata.transport.mode == :fixture
   end
+
+  defp provider_name(provider) when is_atom(provider), do: provider |> Atom.to_string() |> String.upcase()
 end
