@@ -4,10 +4,18 @@ defmodule NxQuantum.Features.Steps.ProviderLiveExecutionContractsSteps do
   @behaviour NxQuantum.Features.FeatureSteps
 
   alias NxQuantum.Features.Steps.RoadmapContractSteps
-
-  @providers ["IBM Runtime", "AWS Braket", "Azure Quantum"]
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   @scenario_configs %{
+    "Registered provider set live lifecycle contract is executable" => %{
+      given: "registered provider set live execution is planned behind provider bridge contracts",
+      when: "registered provider set live adapter delivery is completed",
+      expectations: [
+        "registered provider set live path executes submit poll cancel and fetch_result through authenticated transport calls",
+        "registered provider set lifecycle status mapping covers queued running completed cancelled and failed states",
+        "registered provider set live results preserve schema_version request_id correlation_id idempotency_key and provider_job_id fields"
+      ]
+    },
     "Transport modes stay contract-compatible across fixture and live lanes" => %{
       given: "provider execution supports fixture live_smoke and live transport modes",
       when: "transport mode contracts are finalized",
@@ -42,7 +50,7 @@ defmodule NxQuantum.Features.Steps.ProviderLiveExecutionContractsSteps do
 
   @impl true
   def execute(step, ctx) do
-    config = scenario_config(ctx)
+    config = scenario_config(ctx, step)
     expectations = Map.fetch!(config, :expectations)
 
     ctx
@@ -50,29 +58,14 @@ defmodule NxQuantum.Features.Steps.ProviderLiveExecutionContractsSteps do
     |> then(&RoadmapContractSteps.execute(step, &1, config))
   end
 
-  defp scenario_config(%{scenario: scenario}) do
-    case Regex.run(~r/^Provider (.+) live lifecycle contract is executable$/, scenario, capture: :all_but_first) do
-      [provider] ->
-        if provider in @providers do
-          provider_config(provider)
-        else
-          raise "unsupported provider in scenario: #{provider}"
-        end
+  defp scenario_config(%{scenario: scenario}, step) do
+    config = Map.fetch!(@scenario_configs, scenario)
 
-      _ ->
-        Map.fetch!(@scenario_configs, scenario)
+    if step.text == config.given do
+      providers = :live_execution |> ProviderMatrix.entries_for() |> Enum.map(& &1.label)
+      Map.put(config, :providers, providers)
+    else
+      config
     end
-  end
-
-  defp provider_config(provider) do
-    %{
-      given: "#{provider} live execution is planned behind provider bridge contracts",
-      when: "#{provider} live adapter delivery is completed",
-      expectations: [
-        "#{provider} live path executes submit poll cancel and fetch_result through authenticated transport calls",
-        "#{provider} lifecycle status mapping covers queued running completed cancelled and failed states",
-        "#{provider} live results preserve schema_version request_id correlation_id idempotency_key and provider_job_id fields"
-      ]
-    }
   end
 end

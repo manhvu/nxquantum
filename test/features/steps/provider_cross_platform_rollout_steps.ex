@@ -6,15 +6,14 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
 
   import ExUnit.Assertions
 
-  alias NxQuantum.Adapters.Providers.AwsBraket
-  alias NxQuantum.Adapters.Providers.AzureQuantum
-  alias NxQuantum.Adapters.Providers.IBMRuntime
   alias NxQuantum.Features.StepExecutor
+  alias NxQuantum.Ports.Provider
   alias NxQuantum.ProviderBridge
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   defmodule RaisingProvider do
     @moduledoc false
-    @behaviour NxQuantum.Ports.Provider
+    @behaviour Provider
 
     @impl true
     def provider_id, do: :raising_provider
@@ -55,6 +54,40 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
     def fetch_result(_job, _opts), do: {:ok, %{}}
   end
 
+  defmodule BrokenPayloadProvider do
+    @moduledoc false
+    @behaviour Provider
+
+    @impl true
+    def provider_id, do: :broken_payload_provider
+
+    @impl true
+    def capabilities(_target, _opts),
+      do:
+        {:ok,
+         %{
+           supports_estimator: true,
+           supports_sampler: true,
+           supports_batch: true,
+           supports_dynamic: true,
+           supports_cancel_in_running: true,
+           supports_calibration_payload: true,
+           target_class: :gate_model
+         }}
+
+    @impl true
+    def submit(_payload, _opts), do: :unexpected_shape
+
+    @impl true
+    def poll(_job, _opts), do: {:ok, %{}}
+
+    @impl true
+    def cancel(_job, _opts), do: {:ok, %{}}
+
+    @impl true
+    def fetch_result(_job, _opts), do: {:ok, %{}}
+  end
+
   @impl true
   def feature, do: "provider_cross_platform_rollout.feature"
 
@@ -70,7 +103,7 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
 
   defp handle_setup(%{text: text}, ctx) do
     cond do
-      text == "equivalent workflow intents are executed on IBM Runtime, AWS Braket, and Azure Quantum" ->
+      text == "equivalent workflow intents are executed across the registered provider set" ->
         {:handled, Map.put(ctx, :payload, %{workflow: :sampler, shots: 1024})}
 
       text == "a workflow requires capabilities that differ across providers" ->
@@ -87,16 +120,24 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
          ])}
 
       text == "a provider adapter supports submit, poll, and fetch_result" ->
+        lifecycle_entry = :cross_platform |> ProviderMatrix.entries_for() |> List.first()
+
         {:handled,
          Map.merge(ctx, %{
-           lifecycle_provider: IBMRuntime,
-           lifecycle_payload: %{workflow: :estimator, shots: 512},
-           lifecycle_opts: ibm_opts()
+           lifecycle_provider: lifecycle_entry.adapter,
+           lifecycle_payload: %{workflow: :sampler, shots: 512},
+           lifecycle_opts: provider_opts(lifecycle_entry)
          })}
 
-      text == "IBM Runtime, AWS Braket, and Azure Quantum adapters are configured" ->
+      text == "adapters in the registered provider set are configured" ->
         {:handled,
-         Map.put(ctx, :provider_opts, %{ibm_runtime: ibm_opts(), aws_braket: aws_opts(), azure_quantum: azure_opts()})}
+         Map.put(
+           ctx,
+           :provider_opts,
+           :cross_platform
+           |> ProviderMatrix.entries_for()
+           |> Map.new(fn entry -> {entry.id, provider_opts(entry)} end)
+         )}
 
       text == "a provider adapter raises an exception during a lifecycle operation" ->
         {:handled, Map.merge(ctx, %{raising_provider: RaisingProvider, raising_payload: %{workflow: :sampler}})}
@@ -290,19 +331,19 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
   end
 
   defp cross_provider_lifecycle(payload) do
-    %{
-      ibm_runtime: ProviderBridge.run_lifecycle(IBMRuntime, payload, ibm_opts()),
-      aws_braket: ProviderBridge.run_lifecycle(AwsBraket, payload, aws_opts()),
-      azure_quantum: ProviderBridge.run_lifecycle(AzureQuantum, payload, azure_opts())
-    }
+    :cross_platform
+    |> ProviderMatrix.entries_for()
+    |> Map.new(fn entry ->
+      {entry.id, ProviderBridge.run_lifecycle(entry.adapter, payload, provider_opts(entry))}
+    end)
   end
 
   defp cross_provider_non_portable(payload) do
-    %{
-      ibm_runtime: ProviderBridge.submit_job(IBMRuntime, payload, ibm_opts()),
-      aws_braket: ProviderBridge.submit_job(AwsBraket, payload, aws_opts()),
-      azure_quantum: ProviderBridge.submit_job(AzureQuantum, payload, azure_opts())
-    }
+    :cross_platform
+    |> ProviderMatrix.entries_for()
+    |> Map.new(fn entry ->
+      {entry.id, ProviderBridge.submit_job(entry.adapter, payload, provider_opts(entry))}
+    end)
   end
 
   defp failure_matrix(opts_by_provider, table) do
@@ -345,8 +386,8 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
     ProviderBridge.fetch_result(provider_module(provider), job, opts)
   end
 
-  defp simulate_failure(provider, "unexpected_response_shape", _opts) do
-    ProviderBridge.submit_job(unexpected_provider(provider), %{workflow: :sampler})
+  defp simulate_failure(_provider, "unexpected_response_shape", _opts) do
+    ProviderBridge.submit_job(BrokenPayloadProvider, %{workflow: :sampler})
   end
 
   defp simulate_failure(provider, "capability_mismatch", opts) do
@@ -373,46 +414,7 @@ defmodule NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps do
     )
   end
 
-  defp provider_module(:ibm_runtime), do: IBMRuntime
-  defp provider_module(:aws_braket), do: AwsBraket
-  defp provider_module(:azure_quantum), do: AzureQuantum
+  defp provider_module(provider_id), do: ProviderMatrix.entry!(provider_id).adapter
 
-  defp unexpected_provider(:ibm_runtime),
-    do: NxQuantum.Features.Steps.ProviderIbmRuntimeBridgeSteps.BrokenIbmPayloadProvider
-
-  defp unexpected_provider(:aws_braket),
-    do: NxQuantum.Features.Steps.ProviderAwsBraketBridgeSteps.BrokenBraketPayloadProvider
-
-  defp unexpected_provider(:azure_quantum),
-    do: NxQuantum.Features.Steps.ProviderAzureQuantumBridgeSteps.BrokenAzurePayloadProvider
-
-  defp ibm_opts do
-    [
-      target: "ibm_backend_simulator",
-      provider_config: %{auth_token: "ibm-token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
-    ]
-  end
-
-  defp aws_opts do
-    [
-      target: "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-      provider_config: %{
-        region: "us-east-1",
-        credentials_profile: "default",
-        device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-      }
-    ]
-  end
-
-  defp azure_opts do
-    [
-      target: "azure.quantum.sim",
-      provider_config: %{
-        workspace: "ws-1",
-        auth_context: "managed_identity",
-        target_id: "azure.quantum.sim",
-        provider_name: "microsoft"
-      }
-    ]
-  end
+  defp provider_opts(entry), do: [target: entry.target, provider_config: entry.provider_config]
 end

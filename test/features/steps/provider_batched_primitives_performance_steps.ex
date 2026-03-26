@@ -6,15 +6,13 @@ defmodule NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps do
 
   import ExUnit.Assertions
 
-  alias NxQuantum.Adapters.Providers.AwsBraket
-  alias NxQuantum.Adapters.Providers.AzureQuantum
-  alias NxQuantum.Adapters.Providers.IBMRuntime
   alias NxQuantum.Estimator
   alias NxQuantum.Features.StepExecutor
   alias NxQuantum.Observability
   alias NxQuantum.Performance
   alias NxQuantum.ProviderBridge
   alias NxQuantum.TestSupport.PerformanceFixtures
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   @impl true
   def feature, do: "provider_batched_primitives_performance.feature"
@@ -31,7 +29,7 @@ defmodule NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps do
 
   defp handle_setup(%{text: text}, ctx) do
     cond do
-      text == "equivalent estimator and sampler intents are executed on IBM Runtime, AWS Braket, and Azure Quantum" ->
+      text == "equivalent estimator and sampler intents are executed across the registered provider set" ->
         {:handled, Map.put(ctx, :lifecycle_intents, [:sampler, :estimator])}
 
       text == "one circuit definition and a deterministic parameter batch are provided" ->
@@ -58,7 +56,7 @@ defmodule NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps do
            tolerance: 1.0e-6
          })}
 
-      text == "equivalent workloads are executed across IBM Runtime, AWS Braket, and Azure Quantum" ->
+      text == "equivalent workloads are executed across the registered provider set" ->
         {:handled,
          Map.put(ctx, :workloads, [
            %{workflow: :sampler, shots: 1024, params: %{theta: 0.42, wire: 0}},
@@ -153,11 +151,8 @@ defmodule NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps do
         {:handled, ctx}
 
       text == "deterministic ordering is preserved for equivalent request ordering" ->
-        assert Enum.map(Map.fetch!(ctx.provider_runs, :sampler), & &1.submitted.provider) == [
-                 :ibm_runtime,
-                 :aws_braket,
-                 :azure_quantum
-               ]
+        expected_order = :batched_primitives |> ProviderMatrix.entries_for() |> Enum.map(& &1.id)
+        assert Enum.map(Map.fetch!(ctx.provider_runs, :sampler), & &1.submitted.provider) == expected_order
 
         {:handled, ctx}
 
@@ -241,43 +236,25 @@ defmodule NxQuantum.Features.Steps.ProviderBatchedPrimitivesPerformanceSteps do
   end
 
   defp run_lifecycles(intent) do
-    provider_opts =
-      [
-        {IBMRuntime,
-         [
-           target: "ibm_backend_simulator",
-           provider_config: %{auth_token: "ibm-token", channel: "ibm_cloud", backend: "ibm_backend_simulator"}
-         ]},
-        {AwsBraket,
-         [
-           target: "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-           provider_config: %{
-             region: "us-east-1",
-             credentials_profile: "default",
-             device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-           }
-         ]},
-        {AzureQuantum,
-         [
-           target: "azure.quantum.sim",
-           provider_config: %{
-             workspace: "ws-1",
-             auth_context: "managed_identity",
-             target_id: "azure.quantum.sim",
-             provider_name: "microsoft"
-           }
-         ]}
-      ]
-
-    Enum.map(provider_opts, fn {provider, opts} ->
-      payload = lifecycle_payload(provider, intent)
-      {:ok, lifecycle} = ProviderBridge.run_lifecycle(provider, payload, opts)
+    :batched_primitives
+    |> ProviderMatrix.entries_for()
+    |> Enum.map(fn entry ->
+      opts = [target: entry.target, provider_config: entry.provider_config]
+      payload = lifecycle_payload(entry.adapter, intent, entry.target, entry.provider_config)
+      {:ok, lifecycle} = ProviderBridge.run_lifecycle(entry.adapter, payload, opts)
       lifecycle
     end)
   end
 
-  defp lifecycle_payload(AwsBraket, :estimator), do: %{workflow: :sampler, shots: 1024}
-  defp lifecycle_payload(_provider, intent), do: %{workflow: intent, shots: 1024}
+  defp lifecycle_payload(provider, intent, target, provider_config) do
+    workflow =
+      case provider.capabilities(target, provider_config: provider_config) do
+        {:ok, %{supports_estimator: false}} when intent == :estimator -> :sampler
+        _ -> intent
+      end
+
+    %{workflow: workflow, shots: 1024}
+  end
 
   defp lifecycle_shape(%{submitted: submitted, polled: polled, result: result}) do
     %{

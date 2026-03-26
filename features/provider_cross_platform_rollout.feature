@@ -2,7 +2,7 @@ Feature: Cross-provider rollout and parity contracts
 
   Rule: Normalized contract equivalence exists for portable workflows
     Scenario: Equivalent workflow intents preserve common envelope fields across providers
-      Given equivalent workflow intents are executed on IBM Runtime, AWS Braket, and Azure Quantum
+      Given equivalent workflow intents are executed across the registered provider set
       When terminal results are normalized by ProviderBridge
       Then common envelope fields remain stable across providers
       And provider-specific fields are isolated under metadata extensions
@@ -34,7 +34,7 @@ Feature: Cross-provider rollout and parity contracts
 
   Rule: Clean error taxonomy remains consistent across providers
     Scenario: Equivalent failure classes map to standardized error codes
-      Given IBM Runtime, AWS Braket, and Azure Quantum adapters are configured
+      Given adapters in the registered provider set are configured
       When equivalent failure classes occur across providers
       Then standardized error codes are used consistently
       | failure_class                 | expected_code                |

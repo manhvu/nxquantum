@@ -1,19 +1,13 @@
 Feature: Provider live execution contracts
 
   Rule: Live execution keeps the same public contract shape as deterministic fixture execution
-    Scenario Outline: Provider <provider> live lifecycle contract is executable
-      Given <provider> live execution is planned behind provider bridge contracts
-      When <provider> live adapter delivery is completed
-      Then <provider> live path executes submit poll cancel and fetch_result through authenticated transport calls
-      And <provider> lifecycle status mapping covers queued running completed cancelled and failed states
-      And <provider> live results preserve schema_version request_id correlation_id idempotency_key and provider_job_id fields
+    Scenario: Registered provider set live lifecycle contract is executable
+      Given registered provider set live execution is planned behind provider bridge contracts
+      When registered provider set live adapter delivery is completed
+      Then registered provider set live path executes submit poll cancel and fetch_result through authenticated transport calls
+      And registered provider set lifecycle status mapping covers queued running completed cancelled and failed states
+      And registered provider set live results preserve schema_version request_id correlation_id idempotency_key and provider_job_id fields
       And all roadmap expectations for this feature are implementation-ready
-
-      Examples:
-        | provider      |
-        | IBM Runtime   |
-        | AWS Braket    |
-        | Azure Quantum |
 
     Scenario: Transport modes stay contract-compatible across fixture and live lanes
       Given provider execution supports fixture live_smoke and live transport modes

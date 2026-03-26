@@ -8,12 +8,10 @@ defmodule NxQuantum.Features.Steps.ProviderObservabilitySteps do
 
   alias NxQuantum.Adapters.Observability.Noop
   alias NxQuantum.Adapters.Observability.OpenTelemetry
-  alias NxQuantum.Adapters.Providers.AwsBraket
-  alias NxQuantum.Adapters.Providers.AzureQuantum
-  alias NxQuantum.Adapters.Providers.IBMRuntime
   alias NxQuantum.Features.StepExecutor
   alias NxQuantum.Observability
   alias NxQuantum.ProviderBridge
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   @impl true
   def feature, do: "provider_observability.feature"
@@ -75,45 +73,19 @@ defmodule NxQuantum.Features.Steps.ProviderObservabilitySteps do
 
         payload = %{workflow: :sampler, shots: 1024}
 
-        runs = [
-          ProviderBridge.run_lifecycle(
-            IBMRuntime,
-            payload,
-            ctx.observability_opts
-            |> Keyword.put_new(:target, "ibm_backend_simulator")
-            |> Keyword.put(:provider_config, %{
-              auth_token: "ibm-token",
-              channel: "ibm_cloud",
-              backend: "ibm_backend_simulator"
-            })
-            |> attach_obs(ctx.observability_opts)
-          ),
-          ProviderBridge.run_lifecycle(
-            AwsBraket,
-            payload,
-            ctx.observability_opts
-            |> Keyword.put_new(:target, "arn:aws:braket:::device/quantum-simulator/amazon/sv1")
-            |> Keyword.put(:provider_config, %{
-              region: "us-east-1",
-              credentials_profile: "default",
-              device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-            })
-            |> attach_obs(ctx.observability_opts)
-          ),
-          ProviderBridge.run_lifecycle(
-            AzureQuantum,
-            payload,
-            ctx.observability_opts
-            |> Keyword.put_new(:target, "azure.quantum.sim")
-            |> Keyword.put(:provider_config, %{
-              workspace: "ws-1",
-              auth_context: "managed_identity",
-              target_id: "azure.quantum.sim",
-              provider_name: "microsoft"
-            })
-            |> attach_obs(ctx.observability_opts)
-          )
-        ]
+        runs =
+          :observability
+          |> ProviderMatrix.entries_for()
+          |> Enum.map(fn entry ->
+            ProviderBridge.run_lifecycle(
+              entry.adapter,
+              payload,
+              ctx.observability_opts
+              |> Keyword.put_new(:target, entry.target)
+              |> Keyword.put(:provider_config, entry.provider_config)
+              |> attach_obs(ctx.observability_opts)
+            )
+          end)
 
         {:handled,
          ctx
@@ -121,14 +93,16 @@ defmodule NxQuantum.Features.Steps.ProviderObservabilitySteps do
          |> Map.put(:telemetry_snapshot, Observability.snapshot(adapter: OpenTelemetry))}
 
       text == "profile selection changes for equivalent workflow inputs" ->
+        first_provider = :observability |> ProviderMatrix.entries_for() |> List.first()
+
         profile_snapshots =
           Map.new(ctx.profiles, fn profile ->
             Observability.reset(adapter: OpenTelemetry)
 
             _ =
-              ProviderBridge.run_lifecycle(IBMRuntime, %{workflow: :sampler, shots: 1024},
-                target: "ibm_backend_simulator",
-                provider_config: %{auth_token: "ibm-token", channel: "ibm_cloud", backend: "ibm_backend_simulator"},
+              ProviderBridge.run_lifecycle(first_provider.adapter, %{workflow: :sampler, shots: 1024},
+                target: first_provider.target,
+                provider_config: first_provider.provider_config,
                 observability: [enabled: true, adapter: OpenTelemetry, profile: profile]
               )
 
@@ -166,10 +140,12 @@ defmodule NxQuantum.Features.Steps.ProviderObservabilitySteps do
         {:handled, Map.put(ctx, :conformance_missing, missing)}
 
       text == "provider lifecycle workflow is executed" ->
+        first_provider = :observability |> ProviderMatrix.entries_for() |> List.first()
+
         noop_result =
-          ProviderBridge.run_lifecycle(IBMRuntime, %{workflow: :sampler, shots: 64},
-            target: "ibm_backend_simulator",
-            provider_config: %{auth_token: "ibm-token", channel: "ibm_cloud", backend: "ibm_backend_simulator"},
+          ProviderBridge.run_lifecycle(first_provider.adapter, %{workflow: :sampler, shots: 64},
+            target: first_provider.target,
+            provider_config: first_provider.provider_config,
             observability: ctx.noop_opts
           )
 

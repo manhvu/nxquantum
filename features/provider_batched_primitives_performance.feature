@@ -2,7 +2,7 @@ Feature: Provider batched primitives and performance contracts
 
   Rule: Provider-backed primitives parity is explicit
     Scenario: Equivalent estimator and sampler intents normalize consistently across providers
-      Given equivalent estimator and sampler intents are executed on IBM Runtime, AWS Braket, and Azure Quantum
+      Given equivalent estimator and sampler intents are executed across the registered provider set
       When primitive results are normalized by ProviderBridge
       Then normalized envelope fields are equivalent for the same primitive intent
       And deterministic ordering is preserved for equivalent request ordering
@@ -33,7 +33,7 @@ Feature: Provider batched primitives and performance contracts
 
   Rule: Cross-provider portability intelligence is first-class
     Scenario: Equivalent workloads emit identical fingerprint and portability deltas
-      Given equivalent workloads are executed across IBM Runtime, AWS Braket, and Azure Quantum
+      Given equivalent workloads are executed across the registered provider set
       When portability intelligence is evaluated
       Then experiment fingerprint is identical for canonicalized equivalent workloads
       And portability-delta metrics are emitted with stable schema

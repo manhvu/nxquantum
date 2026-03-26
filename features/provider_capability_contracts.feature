@@ -1,8 +1,8 @@
 Feature: Provider capability contracts
 
   Rule: Capability envelope is explicit and stable
-    Scenario: Required capability keys are defined for every top-3 provider
-      Given provider capability contract version "v1" for top-3 providers
+    Scenario: Required capability keys are defined for every provider in the core provider set
+      Given provider capability contract version "v1" for the core provider set
       When I validate required capability keys for each provider
       Then each capability envelope includes all required capability keys
       | key                           |
@@ -32,7 +32,7 @@ Feature: Provider capability contracts
 
   Rule: Error taxonomy is unified across providers
     Scenario: Capability mismatch uses a consistent clean taxonomy
-      Given capability preflight is evaluated for IBM Runtime, AWS Braket, and Azure Quantum
+      Given capability preflight is evaluated for the registered provider set
       When each provider rejects an unsupported capability for the selected target
       Then error "provider_capability_mismatch" is returned consistently
       And error metadata includes provider, target, and capability identifiers

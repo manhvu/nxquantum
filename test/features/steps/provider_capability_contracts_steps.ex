@@ -6,49 +6,11 @@ defmodule NxQuantum.Features.Steps.ProviderCapabilityContractsSteps do
 
   import ExUnit.Assertions
 
-  alias NxQuantum.Adapters.Providers.AwsBraket
-  alias NxQuantum.Adapters.Providers.IBMRuntime
   alias NxQuantum.Features.StepExecutor
   alias NxQuantum.Ports.Provider
   alias NxQuantum.ProviderBridge
   alias NxQuantum.Providers.Capabilities
-
-  defmodule AzureCapabilityStub do
-    @moduledoc false
-
-    @behaviour Provider
-
-    @impl true
-    def provider_id, do: :azure_quantum
-
-    @impl true
-    def capabilities(_target, _opts) do
-      {:ok,
-       %{
-         supports_estimator: true,
-         supports_sampler: true,
-         supports_batch: true,
-         supports_dynamic: false,
-         supports_cancel_in_running: true,
-         supports_calibration_payload: true,
-         target_class: :gate_model
-       }}
-    end
-
-    @impl true
-    def submit(_payload, _opts),
-      do: {:ok, %{id: "az_job", state: :submitted, provider: provider_id(), target: "azure.target"}}
-
-    @impl true
-    def poll(job, _opts), do: {:ok, %{job | state: :completed}}
-
-    @impl true
-    def cancel(job, _opts), do: {:ok, %{job | state: :cancelled}}
-
-    @impl true
-    def fetch_result(job, _opts),
-      do: {:ok, %{job_id: job.id, state: :completed, provider: provider_id(), target: job.target, payload: %{}}}
-  end
+  alias NxQuantum.TestSupport.ProviderMatrix
 
   defmodule BrokenResponseProvider do
     @moduledoc false
@@ -100,7 +62,7 @@ defmodule NxQuantum.Features.Steps.ProviderCapabilityContractsSteps do
 
   defp handle_setup(%{text: text}, ctx) do
     cond do
-      text == "provider capability contract version \"v1\" for top-3 providers" ->
+      text == "provider capability contract version \"v1\" for the core provider set" ->
         {:handled,
          Map.merge(ctx, %{
            contract_version: :v1,
@@ -109,17 +71,15 @@ defmodule NxQuantum.Features.Steps.ProviderCapabilityContractsSteps do
          })}
 
       text == "provider \"aws_braket\" does not support dynamic execution for selected target" ->
+        aws = ProviderMatrix.entry!(:aws_braket)
+
         {:handled,
          Map.merge(ctx, %{
-           selected_provider: AwsBraket,
+           selected_provider: aws.adapter,
            payload: %{workflow: :sampler, dynamic: true},
            opts: [
-             target: "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-             provider_config: %{
-               region: "us-east-1",
-               credentials_profile: "default",
-               device_arn: "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-             },
+             target: aws.target,
+             provider_config: aws.provider_config,
              notify_submit_pid: self()
            ]
          })}
@@ -139,7 +99,7 @@ defmodule NxQuantum.Features.Steps.ProviderCapabilityContractsSteps do
            preflight_request: %{workflow: :sampler, dynamic: false}
          })}
 
-      text == "capability preflight is evaluated for IBM Runtime, AWS Braket, and Azure Quantum" ->
+      text == "capability preflight is evaluated for the registered provider set" ->
         {:handled, Map.put(ctx, :provider_contracts, provider_contracts())}
 
       text == "a provider adapter returns an unexpected callback response shape" ->
@@ -302,15 +262,15 @@ defmodule NxQuantum.Features.Steps.ProviderCapabilityContractsSteps do
   end
 
   defp provider_contracts do
-    %{
-      ibm_runtime: fetch_contract(IBMRuntime, "ibm_backend_simulator"),
-      aws_braket: fetch_contract(AwsBraket, "arn:aws:braket:::device/quantum-simulator/amazon/sv1"),
-      azure_quantum: fetch_contract(AzureCapabilityStub, "azure.target")
-    }
+    :capability_contracts
+    |> ProviderMatrix.entries_for()
+    |> Map.new(fn entry ->
+      {entry.id, fetch_contract(entry.adapter, entry.target, entry.provider_config)}
+    end)
   end
 
-  defp fetch_contract(provider, target) do
-    assert {:ok, capabilities} = provider.capabilities(target, [])
+  defp fetch_contract(provider, target, provider_config) do
+    assert {:ok, capabilities} = provider.capabilities(target, provider_config: provider_config)
     capabilities
   end
 
