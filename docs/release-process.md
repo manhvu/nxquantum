@@ -16,6 +16,24 @@
 6. `mix test.release_evidence`
 7. Update roadmap/spec status and release notes summary.
 
+### Optional Live-Smoke Provider Gates
+
+For credentialed provider readiness checks, enable one of:
+
+1. global gate: `NXQ_PROVIDER_LIVE_SMOKE=1`
+2. provider-specific gates:
+   - `NXQ_PROVIDER_LIVE_SMOKE_IBM_RUNTIME=1`
+   - `NXQ_PROVIDER_LIVE_SMOKE_AWS_BRAKET=1`
+   - `NXQ_PROVIDER_LIVE_SMOKE_AZURE_QUANTUM=1`
+   - `NXQ_PROVIDER_LIVE_SMOKE_GOOGLE_QUANTUM_AI=1`
+
+Google-specific readiness config (`provider_config`) must include:
+
+1. `auth_token`
+2. `project_id`
+3. `location`
+4. `processor_id`
+
 ## CI Release Automation
 
 The repository includes:

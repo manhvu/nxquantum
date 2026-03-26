@@ -15,6 +15,7 @@ Preparing provider-related release evidence, support-tier updates, and hardening
 3. Run provider hardening checks:
    - `mix test.provider_smoke`
    - `mix test.release_evidence`
+   - enable credentialed live-smoke gates as needed (`NXQ_PROVIDER_LIVE_SMOKE` or provider-specific env keys including `NXQ_PROVIDER_LIVE_SMOKE_GOOGLE_QUANTUM_AI`)
 4. Run reproducible benchmark scripts under `bench/` when performance claims changed.
 5. Critic: verify contract changes are versioned and architecture ownership is explicit.
 6. Verifier: run `mix ci`.
