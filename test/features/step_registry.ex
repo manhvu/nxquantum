@@ -20,6 +20,7 @@ defmodule NxQuantum.Features.StepRegistry do
     NxQuantum.Features.Steps.ProviderIbmRuntimeBridgeSteps,
     NxQuantum.Features.Steps.ProviderAwsBraketBridgeSteps,
     NxQuantum.Features.Steps.ProviderAzureQuantumBridgeSteps,
+    NxQuantum.Features.Steps.ProviderGoogleQuantumAIBridgeSteps,
     NxQuantum.Features.Steps.ProviderCrossPlatformRolloutSteps,
     NxQuantum.Features.Steps.ProviderObservabilitySteps,
     NxQuantum.Features.Steps.ProviderTopologyExecutionPoliciesSteps,

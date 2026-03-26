@@ -3,6 +3,7 @@ defmodule NxQuantum.TestSupport.ProviderMatrix do
 
   alias NxQuantum.Adapters.Providers.AwsBraket
   alias NxQuantum.Adapters.Providers.AzureQuantum
+  alias NxQuantum.Adapters.Providers.GoogleQuantumAI
   alias NxQuantum.Adapters.Providers.IBMRuntime
 
   @type suite_tag ::
@@ -67,6 +68,26 @@ defmodule NxQuantum.TestSupport.ProviderMatrix do
         auth_context: "managed_identity",
         target_id: "azure.quantum.sim",
         provider_name: "microsoft"
+      },
+      suite_tags: [
+        :capability_contracts,
+        :cross_platform,
+        :observability,
+        :live_execution,
+        :transport_readiness,
+        :batched_primitives
+      ]
+    },
+    %{
+      id: :google_quantum_ai,
+      label: "Google Quantum AI",
+      adapter: GoogleQuantumAI,
+      target: "projects/example/locations/us-central1/processors/rainbow",
+      provider_config: %{
+        auth_token: "google-token",
+        project_id: "example",
+        location: "us-central1",
+        processor_id: "projects/example/locations/us-central1/processors/rainbow"
       },
       suite_tags: [
         :capability_contracts,

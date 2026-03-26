@@ -43,6 +43,7 @@ defmodule NxQuantum.ProviderMatrixTest do
     assert %{id: :ibm_runtime, label: "IBM Runtime"} = ProviderMatrix.entry!(:ibm_runtime)
     assert %{id: :aws_braket, label: "AWS Braket"} = ProviderMatrix.entry!(:aws_braket)
     assert %{id: :azure_quantum, label: "Azure Quantum"} = ProviderMatrix.entry!(:azure_quantum)
+    assert %{id: :google_quantum_ai, label: "Google Quantum AI"} = ProviderMatrix.entry!(:google_quantum_ai)
   end
 
   test "entry! raises for unknown provider id" do

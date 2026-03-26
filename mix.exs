@@ -213,7 +213,7 @@ defmodule NxQuantum.MixProject do
       "test.arch": ["test test/architecture"],
       "test.features": ["test test/features/features_test.exs"],
       "test.provider_smoke": [
-        "test test/nx_quantum/providers_capabilities_test.exs test/nx_quantum/provider_adapters_test.exs test/nx_quantum/provider_bridge_test.exs test/nx_quantum/provider_azure_adapter_test.exs test/nx_quantum/observability_test.exs",
+        "test test/nx_quantum/providers_capabilities_test.exs test/nx_quantum/provider_adapters_test.exs test/nx_quantum/provider_bridge_test.exs test/nx_quantum/provider_azure_adapter_test.exs test/nx_quantum/provider_google_quantum_ai_adapter_test.exs test/nx_quantum/observability_test.exs",
         "test test/features/features_test.exs"
       ],
       "test.release_evidence": [
