@@ -186,6 +186,7 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `features/provider_ibm_runtime_bridge.feature`
   - `features/provider_aws_braket_bridge.feature`
   - `features/provider_azure_quantum_bridge.feature`
+  - `features/provider_google_quantum_ai_bridge.feature`
   - `features/provider_cross_platform_rollout.feature`
   - `features/provider_observability.feature`
 - Planned public entrypoints:
@@ -212,6 +213,7 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - NxQuantum.Adapters.Providers.IBMRuntime
   - NxQuantum.Adapters.Providers.AwsBraket
   - NxQuantum.Adapters.Providers.AzureQuantum
+  - NxQuantum.Adapters.Providers.GoogleQuantumAI
   - NxQuantum.Adapters.Providers.Common.LifecycleSupport
   - NxQuantum.Adapters.Providers.Common.LiveTransport
   - NxQuantum.Adapters.Providers.Common.StateMapper
