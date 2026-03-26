@@ -5,13 +5,7 @@ defmodule NxQuantum.BenchCacheModeGuardTest do
   @script "bench/nxquantum_python_comparison.exs"
 
   test "benchmark harness emits sampled lane output with cache_mode" do
-    {output, status} =
-      System.cmd(
-        "mise",
-        ["exec", "--", "mix", "run", @script, "1", "cpu_portable", "sampled_counts_sparse_terms", "cold"],
-        cd: @repo_root,
-        stderr_to_stdout: true
-      )
+    {output, status} = run_bench("sampled_counts_sparse_terms")
 
     assert status == 0
     assert output =~ "NXQ_BENCH"
@@ -20,17 +14,24 @@ defmodule NxQuantum.BenchCacheModeGuardTest do
   end
 
   test "benchmark harness supports cache_mode on batch observable lane" do
-    {output, status} =
-      System.cmd(
-        "mise",
-        ["exec", "--", "mix", "run", @script, "1", "cpu_portable", "batch_obs_8q", "cold"],
-        cd: @repo_root,
-        stderr_to_stdout: true
-      )
+    {output, status} = run_bench("batch_obs_8q")
 
     assert status == 0
     assert output =~ "NXQ_BENCH"
     assert output =~ "scenario=batch_obs_8q"
     assert output =~ "cache_mode=cold"
+  end
+
+  defp run_bench(scenario) do
+    args = ["run", @script, "1", "cpu_portable", scenario, "cold"]
+
+    {cmd, cmd_args} =
+      if System.find_executable("mise") do
+        {"mise", ["exec", "--", "mix" | args]}
+      else
+        {"mix", args}
+      end
+
+    System.cmd(cmd, cmd_args, cd: @repo_root, stderr_to_stdout: true)
   end
 end
