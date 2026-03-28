@@ -301,14 +301,19 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.AI.Result`
   - `NxQuantum.AI.Error`
   - `NxQuantum.AI.ToolRunner`
+  - `NxQuantum.AI.Tools.KernelRerank`
+  - `NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy`
 - Ports/adapters:
   - `NxQuantum.Ports.AIToolTransport`
+  - `NxQuantum.Ports.VectorQuantizer`
   - `NxQuantum.Adapters.AIToolTransport.McpJsonRpcSync`
   - `NxQuantum.Adapters.AIToolTransport.CloudEventsAsync`
+  - `NxQuantum.Adapters.VectorQuantization.TurboQuant`
 - Invariants:
   - canonical tool envelopes stay transport-neutral and versioned
   - sync and async execution paths preserve typed deterministic errors
   - trace/correlation metadata remains intact end-to-end
+  - quantized rerank lane remains deterministic for fixed seed and bounded parallel settings
 
 ## Refactor Rules
 

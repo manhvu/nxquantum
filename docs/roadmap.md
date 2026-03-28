@@ -569,6 +569,52 @@ Milestone Y review gate (v0.9 readiness):
 3. Rollout artifacts are reproducible and actionable for release decisions.
 4. Public docs clearly distinguish implemented capabilities from research backlog.
 
+## Phase 22 - v1.0 P5: TurboQuant-Inspired Parallel Rerank Compression
+
+Goal:
+
+1. Deliver deterministic, BEAM-parallel, TurboQuant-inspired vector compression for AI reranking workflows behind stable typed contracts.
+
+Implementation deliverables:
+
+1. Add vector quantization port and deterministic TurboQuant-inspired adapter:
+   - `lib/nx_quantum/ports/vector_quantizer.ex`
+   - `lib/nx_quantum/adapters/vector_quantization/turbo_quant.ex`
+2. Add dedicated kernel-rerank tool module with deterministic parallel execution strategy:
+   - `lib/nx_quantum/ai/tools/kernel_rerank.ex`
+   - `lib/nx_quantum/ai/tools/kernel_rerank/execution_strategy.ex`
+   - `lib/nx_quantum/ai/tool_runner.ex` delegation update
+3. Preserve backward compatibility and add versioned tool-name alias support:
+   - `quantum-kernel reranking`
+   - `quantum_kernel_rerank.v1`
+4. Add deterministic test coverage for quantization behavior and parallel/scalar parity:
+   - `test/nx_quantum/ai/tool_contract_test.exs`
+   - `test/nx_quantum/adapters/vector_quantization/turbo_quant_test.exs`
+   - `test/nx_quantum/ai/kernel_rerank_execution_strategy_test.exs`
+5. Add benchmark evidence lanes and guards:
+   - `bench/hybrid_quantum_ai_benchmark.exs` TurboQuant scenario
+   - `bench/turboquant_rerank_benchmark.exs`
+   - `test/nx_quantum/hybrid_quantum_ai_benchmark_guard_test.exs`
+6. Publish user-facing docs and integration guidance:
+   - `docs/turboquant-rerank-guide.md`
+   - updates in `README.md`, `docs/v1.0-hybrid-quantum-ai-benchmark.md`, `docs/v1.0-hybrid-quantum-ai-integration-guide.md`, and `bench/README.md`
+
+Implementation status checklist (as of March 28, 2026):
+
+1. `[x]` Vector quantization port and deterministic TurboQuant-inspired adapter are implemented.
+2. `[x]` Kernel-rerank tool module supports quantized embedding mode with deterministic parallel strategy.
+3. `[x]` Legacy and versioned rerank tool names are both supported without API breakage.
+4. `[x]` Deterministic tests cover quantizer behavior and parallel/scalar parity.
+5. `[x]` Benchmark scripts and guards include TurboQuant rerank evidence lanes.
+6. `[x]` User docs and benchmark guidance are updated for TurboQuant usage.
+
+Milestone Z review gate (before next roadmap phase):
+
+1. TurboQuant rerank path is deterministic for fixed seed and yields stable ranked outputs across repeated runs.
+2. Parallel and scalar lanes produce equivalent ranking outputs under the same inputs and seed.
+3. Benchmark artifacts include quality, latency, and memory evidence for TurboQuant scenario lanes.
+4. Public docs describe capability boundaries and avoid claiming simulator-core quantization support.
+
 ## Proposed Backlog (Not Scheduled in Roadmap)
 
 1. Additional provider-native analog/non-gate-model workflow support remains unscheduled beyond v0.9.

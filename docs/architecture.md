@@ -63,6 +63,11 @@ Behavior ownership is defined by executable features, not by file location alone
   - `publish_async/2`
   - `fetch_async_result/2`
   - `cancel_async/2`
+- NxQuantum.Ports.VectorQuantizer
+  - `quantize_batch/2`
+  - `estimate_dot_products/3`
+  - `dequantize_batch/2`
+  - `capabilities/1`
 
 ## v0.2 Facade Modules
 
