@@ -18,6 +18,80 @@ defmodule NxQuantum.AI.ToolContractTest do
     assert result.output.ranked_candidate_ids == ["a", "c", "b"]
   end
 
+  test "versioned rerank handler supports quantized embedding mode with deterministic output" do
+    req = %{
+      schema_version: "v1",
+      request_id: "req-1b",
+      correlation_id: "corr-1b",
+      tool_name: "quantum_kernel_rerank.v1",
+      input: %{
+        candidate_ids: ["c1", "c2", "c3"],
+        query_embedding: [0.8, 0.1, -0.2, 0.5],
+        candidate_embeddings: %{
+          "c1" => [0.9, 0.0, -0.3, 0.6],
+          "c2" => [0.1, 0.6, 0.8, -0.2],
+          "c3" => [0.7, 0.2, -0.1, 0.4]
+        },
+        quantization: %{codec: :turboquant, mode: :mse, bit_width: 3, seed: 1234}
+      },
+      execution_policy: %{fallback_policy: :strict}
+    }
+
+    assert {:ok, first} = AI.run_tool(req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert {:ok, second} = AI.run_tool(req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert first.status == :ok
+    assert first.output.ranked_candidate_ids == second.output.ranked_candidate_ids
+    assert first.metadata.ranking.quantization_codec == :turboquant
+  end
+
+  test "parallel and scalar quantized lanes preserve deterministic ranking order" do
+    base_input = %{
+      candidate_ids: Enum.map(1..40, &"d#{&1}"),
+      query_embedding: Enum.map(1..64, fn i -> :math.sin(i / 5.0) end),
+      candidate_embeddings:
+        Map.new(1..40, fn i ->
+          {"d#{i}", Enum.map(1..64, fn j -> :math.cos((i + j) / 7.0) end)}
+        end)
+    }
+
+    scalar_req = %{
+      schema_version: "v1",
+      request_id: "req-1c-scalar",
+      correlation_id: "corr-1c",
+      tool_name: "quantum_kernel_rerank.v1",
+      input:
+        Map.put(base_input, :quantization, %{
+          codec: :turboquant,
+          mode: :prod_unbiased,
+          bit_width: 4,
+          seed: 2026,
+          parallel_mode: :force_scalar
+        }),
+      execution_policy: %{fallback_policy: :strict}
+    }
+
+    parallel_req = %{
+      schema_version: "v1",
+      request_id: "req-1c-parallel",
+      correlation_id: "corr-1c",
+      tool_name: "quantum_kernel_rerank.v1",
+      input:
+        Map.put(base_input, :quantization, %{
+          codec: :turboquant,
+          mode: :prod_unbiased,
+          bit_width: 4,
+          seed: 2026,
+          parallel_mode: :force_parallel,
+          max_concurrency: 4
+        }),
+      execution_policy: %{fallback_policy: :strict}
+    }
+
+    assert {:ok, scalar_result} = AI.run_tool(scalar_req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert {:ok, parallel_result} = AI.run_tool(parallel_req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert scalar_result.output.ranked_candidate_ids == parallel_result.output.ranked_candidate_ids
+  end
+
   test "constrained optimization helper falls back deterministically when capability is unavailable" do
     req = %{
       schema_version: "v1",
@@ -50,5 +124,24 @@ defmodule NxQuantum.AI.ToolContractTest do
     assert {:error, error} = AI.run_tool(req)
     assert error.code == :ai_tool_unsupported
     assert error.category == :capability
+  end
+
+  test "invalid quantized embedding payload falls back deterministically when fallback is allowed" do
+    req = %{
+      schema_version: "v1",
+      request_id: "req-4",
+      correlation_id: "corr-4",
+      tool_name: "quantum_kernel_rerank.v1",
+      input: %{
+        candidate_ids: ["x", "y"],
+        query_embedding: [0.1, 0.2],
+        candidate_embeddings: %{"x" => [0.2, 0.1]}
+      },
+      execution_policy: %{fallback_policy: :allow_classical_fallback}
+    }
+
+    assert {:ok, result} = AI.run_tool(req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert result.status == :fallback
+    assert result.output.ranked_candidate_ids == ["x", "y"]
   end
 end
