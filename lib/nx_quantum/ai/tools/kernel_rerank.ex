@@ -283,20 +283,20 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
     end
   end
 
-  defp fetch_cached_quantized(cache_table, cache_key) when is_reference(cache_table) do
+  defp fetch_cached_quantized(nil, _cache_key), do: :miss
+
+  defp fetch_cached_quantized(cache_table, cache_key) do
     case QuantizedCache.get(cache_table, cache_key) do
       {:hit, quantized} -> {:ok, quantized}
       :miss -> :miss
     end
   end
 
-  defp fetch_cached_quantized(_cache_table, _cache_key), do: :miss
+  defp maybe_store_quantized(nil, _cache_key, _quantized), do: :ok
 
-  defp maybe_store_quantized(cache_table, cache_key, quantized) when is_reference(cache_table) do
+  defp maybe_store_quantized(cache_table, cache_key, quantized) do
     QuantizedCache.put(cache_table, cache_key, quantized)
   end
-
-  defp maybe_store_quantized(_cache_table, _cache_key, _quantized), do: :ok
 
   defp quantized_cache_key(vectors, quantization_opts) do
     payload = %{

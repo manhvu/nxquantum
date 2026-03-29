@@ -301,8 +301,8 @@ This map keeps refactoring grounded in behavior. Every internal structural chang
   - `NxQuantum.AI.Result`
   - `NxQuantum.AI.Error`
   - `NxQuantum.AI.ToolRunner`
-  - `NxQuantum.AI.Tools.KernelRerank`
-  - `NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy`
+  - `lib/nx_quantum/ai/tools/kernel_rerank.ex` (kernel rerank tool module)
+  - `lib/nx_quantum/ai/tools/kernel_rerank/execution_strategy.ex` (execution strategy module)
 - Ports/adapters:
   - `NxQuantum.Ports.AIToolTransport`
   - `NxQuantum.Ports.VectorQuantizer`
