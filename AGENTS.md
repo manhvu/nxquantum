@@ -9,6 +9,7 @@ Build NxQuantum as a high-performance, deterministic, BEAM-native quantum ML lib
 - Keep tests deterministic: fixed seeds, fixed fixtures, explicit tolerances, no hidden randomness.
 - Keep public API contracts stable unless change intent is explicitly `api change` and docs are updated.
 - Any non-trivial performance change must include reproducible benchmark evidence.
+- Public messaging must foreground deterministic, BEAM-native, benchmark-backed hybrid quantum-AI workflows; never imply universal provider breadth or deterministic live-QPU outcomes without explicit evidence.
 
 ## Required Reading By Task Type
 | Task type | Required reading |
@@ -16,6 +17,7 @@ Build NxQuantum as a high-performance, deterministic, BEAM-native quantum ML lib
 | Feature delivery | `docs/roadmap.md`, `docs/development-flow.md`, `docs/bounded-context-map.md` |
 | Architecture/refactor | `docs/architecture.md`, `docs/bounded-context-map.md`, relevant `docs/adr/*.md` |
 | API/DX | `docs/api-stability.md`, `docs/development-flow.md`, `README.md` |
+| Positioning/docs | `README.md`, `docs/product-positioning.md`, `docs/quantum-llm-vision.md`, `docs/decision-matrix.md`, latest `docs/python-alternatives-benchmark-*.md` |
 | Verification | `docs/testing-strategy.md`, `docs/development-flow.md` |
 | Kernel/performance | `docs/v0.9-high-value-performance-matrix.md`, `docs/python-alternatives-benchmark-2026-03-25.md`, `docs/axon-integration.md` |
 | Provider integration/contracts | `docs/playbooks/provider-contracts.md`, `docs/migration-python-playbook.md`, `docs/python-comparison-workflows.md` |
