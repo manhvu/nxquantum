@@ -4,10 +4,19 @@ defmodule NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy do
   @default_parallel_threshold 32
   @default_parallel_min_work 16_384
 
+  @type reason ::
+          :forced_scalar
+          | :forced_parallel
+          | :parallel_threshold_met
+          | :below_parallel_threshold
+          | :parallel_disabled
+
   @type t :: %{
           mode: :scalar | :parallel,
           max_concurrency: pos_integer(),
-          chunk_size: pos_integer()
+          chunk_size: pos_integer(),
+          reason: reason(),
+          estimated_work: pos_integer()
         }
 
   @spec select(non_neg_integer(), non_neg_integer(), keyword()) :: t()
@@ -23,28 +32,48 @@ defmodule NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy do
 
     case parallel_mode do
       :force_scalar ->
-        scalar_strategy(candidate_count)
+        scalar_strategy(candidate_count, :forced_scalar, estimated_work)
 
       :force_parallel ->
-        parallel_strategy(candidate_count, max_concurrency)
+        parallel_strategy(candidate_count, max_concurrency, :forced_parallel, estimated_work)
 
       :auto ->
-        if(parallel_eligible?,
-          do: parallel_strategy(candidate_count, max_concurrency),
-          else: scalar_strategy(candidate_count)
-        )
+        cond do
+          not parallel? ->
+            scalar_strategy(candidate_count, :parallel_disabled, estimated_work)
+
+          parallel_eligible? ->
+            parallel_strategy(candidate_count, max_concurrency, :parallel_threshold_met, estimated_work)
+
+          true ->
+            scalar_strategy(candidate_count, :below_parallel_threshold, estimated_work)
+        end
 
       _unsupported ->
-        scalar_strategy(candidate_count)
+        scalar_strategy(candidate_count, :below_parallel_threshold, estimated_work)
     end
   end
 
-  defp parallel_strategy(candidate_count, max_concurrency) do
+  defp parallel_strategy(candidate_count, max_concurrency, reason, estimated_work) do
     chunk_size = (candidate_count + max_concurrency - 1) |> div(max_concurrency * 2) |> max(1)
-    %{mode: :parallel, max_concurrency: max_concurrency, chunk_size: chunk_size}
+    %{
+      mode: :parallel,
+      max_concurrency: max_concurrency,
+      chunk_size: chunk_size,
+      reason: reason,
+      estimated_work: estimated_work
+    }
   end
 
-  defp scalar_strategy(candidate_count), do: %{mode: :scalar, max_concurrency: 1, chunk_size: max(1, candidate_count)}
+  defp scalar_strategy(candidate_count, reason, estimated_work) do
+    %{
+      mode: :scalar,
+      max_concurrency: 1,
+      chunk_size: max(1, candidate_count),
+      reason: reason,
+      estimated_work: estimated_work
+    }
+  end
 
   defp max_concurrency(opts) do
     opts

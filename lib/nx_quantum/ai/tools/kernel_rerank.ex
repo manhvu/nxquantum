@@ -4,6 +4,7 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
   alias NxQuantum.Adapters.VectorQuantization.TurboQuant
   alias NxQuantum.AI.Request
   alias NxQuantum.AI.Result
+  alias NxQuantum.AI.Tools.KernelRerank.QuantizedCache
   alias NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy
 
   @spec run(Request.t(), keyword()) :: {:ok, Result.t()} | {:error, map()}
@@ -75,8 +76,9 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
          {:ok, dim} <- validate_dim(vectors, query) do
       strategy = ExecutionStrategy.select(length(candidate_ids), dim, quantization_opts)
       quantizer = Keyword.get(opts, :vector_quantizer, TurboQuant)
+      cache_table = Keyword.get(opts, :quantized_batch_cache)
 
-      with {:ok, quantized} <- quantizer.quantize_batch(vectors, quantization_opts),
+      with {:ok, quantized, cache_hit} <- quantize_with_cache(vectors, quantization_opts, quantizer, cache_table),
            {:ok, scores} <- quantizer.estimate_dot_products(query, quantized, parallel_strategy: strategy) do
         score_map = candidate_ids |> Enum.zip(scores) |> Map.new()
         ranked = rank_candidates(candidate_ids, score_map)
@@ -85,13 +87,20 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
          %{
            ranking_mode: :quantized_embeddings,
            quantization_codec: :turboquant,
+           codec_version: Map.get(quantized, :schema_version, "v1"),
            quantization_mode: Keyword.get(quantization_opts, :mode, :mse),
            bit_width: Keyword.get(quantization_opts, :bit_width, 3),
            seed: Keyword.get(quantization_opts, :seed, 20_260_328),
+           calibration_id: Keyword.get(quantization_opts, :calibration_id),
+           cache_hit: cache_hit,
            parallel_mode: strategy.mode,
-           max_concurrency: strategy.max_concurrency,
-           chunk_size: strategy.chunk_size,
-           vector_dim: dim
+           strategy_reason: strategy.reason,
+           estimated_work: strategy.estimated_work,
+            max_concurrency: strategy.max_concurrency,
+            chunk_size: strategy.chunk_size,
+           quantized_bytes_per_vector: bytes_per_vector(dim, Keyword.get(quantization_opts, :bit_width, 3)),
+           compression_ratio_vs_fp32: compression_ratio(dim, Keyword.get(quantization_opts, :bit_width, 3)),
+            vector_dim: dim
          }}
       end
     end
@@ -160,6 +169,7 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
          mode: Map.get(quantization, :mode, :mse),
          bit_width: Map.get(quantization, :bit_width, 3),
          seed: Map.get(quantization, :seed, 20_260_328),
+         calibration_id: Map.get(quantization, :calibration_id),
          parallel_mode: Map.get(quantization, :parallel_mode, :auto),
          parallel: Map.get(quantization, :parallel, true),
          parallel_threshold: Map.get(quantization, :parallel_threshold, 32),
@@ -233,5 +243,58 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
       message: message,
       details: Map.merge(%{tool_name: request.tool_name}, details)
     }
+  end
+
+  defp quantize_with_cache(vectors, quantization_opts, quantizer, cache_table) do
+    cache_key = quantized_cache_key(vectors, quantization_opts)
+
+    case fetch_cached_quantized(cache_table, cache_key) do
+      {:ok, quantized} ->
+        {:ok, quantized, true}
+
+      :miss ->
+        with {:ok, quantized} <- quantizer.quantize_batch(vectors, quantization_opts) do
+          maybe_store_quantized(cache_table, cache_key, quantized)
+          {:ok, quantized, false}
+        end
+    end
+  end
+
+  defp fetch_cached_quantized(cache_table, cache_key) when is_reference(cache_table) do
+    case QuantizedCache.get(cache_table, cache_key) do
+      {:hit, quantized} -> {:ok, quantized}
+      :miss -> :miss
+    end
+  end
+
+  defp fetch_cached_quantized(_cache_table, _cache_key), do: :miss
+
+  defp maybe_store_quantized(cache_table, cache_key, quantized) when is_reference(cache_table) do
+    QuantizedCache.put(cache_table, cache_key, quantized)
+  end
+
+  defp maybe_store_quantized(_cache_table, _cache_key, _quantized), do: :ok
+
+  defp quantized_cache_key(vectors, quantization_opts) do
+    payload = %{
+      vectors: vectors,
+      mode: Keyword.get(quantization_opts, :mode, :mse),
+      bit_width: Keyword.get(quantization_opts, :bit_width, 3),
+      seed: Keyword.get(quantization_opts, :seed, 20_260_328),
+      calibration_id: Keyword.get(quantization_opts, :calibration_id)
+    }
+
+    :sha256
+    |> :crypto.hash(:erlang.term_to_binary(payload, [:deterministic]))
+    |> Base.encode16(case: :lower)
+  end
+
+  defp bytes_per_vector(dim, bit_width) do
+    div(dim * bit_width + 7, 8)
+  end
+
+  defp compression_ratio(dim, bit_width) do
+    quantized = max(1, bytes_per_vector(dim, bit_width))
+    Float.round(dim * 4.0 / quantized, 3)
   end
 end

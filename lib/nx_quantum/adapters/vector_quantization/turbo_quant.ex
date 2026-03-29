@@ -103,6 +103,7 @@ defmodule NxQuantum.Adapters.VectorQuantization.TurboQuant do
   def capabilities(_opts) do
     %{
       codec: :turboquant,
+      codec_version: "v1",
       deterministic: true,
       supported_modes: [:mse, :prod_unbiased],
       bit_width_range: {@min_bit_width, @max_bit_width}

@@ -47,4 +47,11 @@ defmodule NxQuantum.Adapters.VectorQuantization.TurboQuantTest do
     assert {:error, error} = TurboQuant.estimate_dot_products([0.2, 0.3, 0.4], batch)
     assert error.code == :vector_quantizer_dimension_mismatch
   end
+
+  test "capabilities expose deterministic codec metadata" do
+    capabilities = TurboQuant.capabilities([])
+    assert capabilities.codec == :turboquant
+    assert capabilities.codec_version == "v1"
+    assert capabilities.deterministic == true
+  end
 end

@@ -92,6 +92,57 @@ defmodule NxQuantum.AI.ToolContractTest do
     assert scalar_result.output.ranked_candidate_ids == parallel_result.output.ranked_candidate_ids
   end
 
+  test "quantized rerank metadata includes cache and compression diagnostics" do
+    cache_table = :ets.new(:nxq_kernel_rerank_cache_test, [:set, :public])
+
+    request = %{
+      schema_version: "v1",
+      request_id: "req-cache-1",
+      correlation_id: "corr-cache-1",
+      tool_name: "quantum_kernel_rerank.v1",
+      input: %{
+        candidate_ids: ["x1", "x2", "x3", "x4"],
+        query_embedding: [0.2, 0.7, -0.1, 0.5],
+        candidate_embeddings: %{
+          "x1" => [0.1, 0.8, -0.2, 0.4],
+          "x2" => [0.3, 0.4, 0.5, -0.1],
+          "x3" => [-0.3, 0.2, 0.7, 0.1],
+          "x4" => [0.6, -0.2, 0.1, 0.7]
+        },
+        quantization: %{
+          codec: :turboquant,
+          mode: :prod_unbiased,
+          bit_width: 4,
+          seed: 20260329,
+          calibration_id: "calib-rerank-v1"
+        }
+      },
+      execution_policy: %{fallback_policy: :strict}
+    }
+
+    assert {:ok, first} =
+             AI.run_tool(
+               request,
+               provider_capabilities: %{supports_kernel_rerank: true},
+               quantized_batch_cache: cache_table
+             )
+
+    assert {:ok, second} =
+             AI.run_tool(
+               request,
+               provider_capabilities: %{supports_kernel_rerank: true},
+               quantized_batch_cache: cache_table
+             )
+
+    assert first.metadata.ranking.quantization_codec == :turboquant
+    assert first.metadata.ranking.codec_version == "v1"
+    assert first.metadata.ranking.calibration_id == "calib-rerank-v1"
+    assert first.metadata.ranking.cache_hit == false
+    assert second.metadata.ranking.cache_hit == true
+    assert first.metadata.ranking.quantized_bytes_per_vector > 0
+    assert first.metadata.ranking.compression_ratio_vs_fp32 >= 1.0
+  end
+
   test "constrained optimization helper falls back deterministically when capability is unavailable" do
     req = %{
       schema_version: "v1",
