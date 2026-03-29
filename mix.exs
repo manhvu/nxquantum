@@ -158,6 +158,7 @@ defmodule NxQuantum.MixProject do
         "docs/v1.0-quantum-ai-tool-contracts.md",
         "docs/v1.0-hybrid-quantum-ai-benchmark.md",
         "docs/v1.0-hybrid-quantum-ai-integration-guide.md",
+        "docs/turboquant-rerank-guide.md",
         "docs/quantum-llm-vision.md",
         "docs/v0.5-provider-implementation-plan.md",
         "docs/v0.5-acceptance-criteria.md",
