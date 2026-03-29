@@ -4,6 +4,7 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
   alias NxQuantum.Adapters.VectorQuantization.TurboQuant
   alias NxQuantum.AI.Request
   alias NxQuantum.AI.Result
+  alias NxQuantum.AI.Tools.KernelRerank.DatasetCSV
   alias NxQuantum.AI.Tools.KernelRerank.QuantizedCache
   alias NxQuantum.AI.Tools.KernelRerank.ExecutionStrategy
 
@@ -52,20 +53,21 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
   end
 
   defp ranking_payload(%Request{} = request, opts) do
-    input = request.input
-    candidate_ids = Map.get(input, :candidate_ids, [])
-    score_map = Map.get(input, :scores, %{})
+    with {:ok, input} <- maybe_hydrate_dataset(request.input) do
+      candidate_ids = Map.get(input, :candidate_ids, [])
+      score_map = Map.get(input, :scores, %{})
 
-    cond do
-      candidate_ids == [] ->
-        {:error, %{code: :ai_tool_invalid_request, field: :candidate_ids, message: "candidate_ids required"}}
+      cond do
+        candidate_ids == [] ->
+          {:error, %{code: :ai_tool_invalid_request, field: :candidate_ids, message: "candidate_ids required"}}
 
-      is_map(score_map) and map_size(score_map) > 0 ->
-        ranked = rank_candidates(candidate_ids, score_map)
-        {:ok, ranked, %{ranking_mode: :scores}}
+        is_map(score_map) and map_size(score_map) > 0 ->
+          ranked = rank_candidates(candidate_ids, score_map)
+          {:ok, ranked, %{ranking_mode: :scores}}
 
-      true ->
-        ranking_with_embeddings(candidate_ids, input, opts)
+        true ->
+          ranking_with_embeddings(candidate_ids, input, opts)
+      end
     end
   end
 
@@ -98,9 +100,11 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
            estimated_work: strategy.estimated_work,
             max_concurrency: strategy.max_concurrency,
             chunk_size: strategy.chunk_size,
-           quantized_bytes_per_vector: bytes_per_vector(dim, Keyword.get(quantization_opts, :bit_width, 3)),
-           compression_ratio_vs_fp32: compression_ratio(dim, Keyword.get(quantization_opts, :bit_width, 3)),
-            vector_dim: dim
+            quantized_bytes_per_vector: bytes_per_vector(dim, Keyword.get(quantization_opts, :bit_width, 3)),
+            compression_ratio_vs_fp32: compression_ratio(dim, Keyword.get(quantization_opts, :bit_width, 3)),
+            vector_dim: dim,
+            dataset_source: Map.get(input, :dataset_source),
+            dataset_query_id: Map.get(input, :dataset_query_id)
          }}
       end
     end
@@ -243,6 +247,25 @@ defmodule NxQuantum.AI.Tools.KernelRerank do
       message: message,
       details: Map.merge(%{tool_name: request.tool_name}, details)
     }
+  end
+
+  defp maybe_hydrate_dataset(input) do
+    cond do
+      has_embeddings?(input) ->
+        {:ok, input}
+
+      Map.has_key?(input, :dataset_path) ->
+        with {:ok, hydrated} <- DatasetCSV.load(input) do
+          {:ok, Map.merge(input, hydrated)}
+        end
+
+      true ->
+        {:ok, input}
+    end
+  end
+
+  defp has_embeddings?(input) do
+    is_list(Map.get(input, :query_embedding)) and is_map(Map.get(input, :candidate_embeddings))
   end
 
   defp quantize_with_cache(vectors, quantization_opts, quantizer, cache_table) do

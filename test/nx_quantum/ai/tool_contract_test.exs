@@ -143,6 +143,39 @@ defmodule NxQuantum.AI.ToolContractTest do
     assert first.metadata.ranking.compression_ratio_vs_fp32 >= 1.0
   end
 
+  test "versioned rerank handler supports loading embeddings from dataset_path" do
+    dataset_path =
+      write_dataset!(
+        "tool_contract_rerank_dataset.csv",
+        """
+        query_id,candidate_id,query_embedding,candidate_embedding,label,classical_score
+        q-42,d-1,0.7|0.2|-0.1|0.9,0.8|0.1|-0.2|0.8,3,0.91
+        q-42,d-2,0.7|0.2|-0.1|0.9,0.6|0.2|-0.3|0.7,2,0.77
+        q-42,d-3,0.7|0.2|-0.1|0.9,0.1|0.8|0.4|-0.1,0,0.21
+        """
+      )
+
+    req = %{
+      schema_version: "v1",
+      request_id: "req-ds-1",
+      correlation_id: "corr-ds-1",
+      tool_name: "quantum_kernel_rerank.v1",
+      input: %{
+        dataset_path: dataset_path,
+        query_id: "q-42",
+        candidate_ids: ["d-2", "d-1", "d-3"],
+        quantization: %{codec: :turboquant, mode: :mse, bit_width: 3, seed: 20260329}
+      },
+      execution_policy: %{fallback_policy: :strict}
+    }
+
+    assert {:ok, result} = AI.run_tool(req, provider_capabilities: %{supports_kernel_rerank: true})
+    assert result.status == :ok
+    assert Enum.sort(result.output.ranked_candidate_ids) == ["d-1", "d-2", "d-3"]
+    assert result.metadata.ranking.dataset_source == "tool_contract_rerank_dataset.csv"
+    assert result.metadata.ranking.dataset_query_id == "q-42"
+  end
+
   test "constrained optimization helper falls back deterministically when capability is unavailable" do
     req = %{
       schema_version: "v1",
@@ -194,5 +227,11 @@ defmodule NxQuantum.AI.ToolContractTest do
     assert {:ok, result} = AI.run_tool(req, provider_capabilities: %{supports_kernel_rerank: true})
     assert result.status == :fallback
     assert result.output.ranked_candidate_ids == ["x", "y"]
+  end
+
+  defp write_dataset!(filename, body) do
+    path = Path.join(System.tmp_dir!(), filename)
+    File.write!(path, body)
+    path
   end
 end

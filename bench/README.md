@@ -107,14 +107,14 @@ mise exec -- mix run bench/batch_obs_regression_guard.exs
 mise exec -- mix run bench/batch_obs_hot_cold_guard.exs
 ```
 
-## Phase 20 Hybrid Quantum-AI (Planned)
+## Phase 20 Hybrid Quantum-AI
 
-Implementation-ready benchmark/dataset/API contracts:
+Benchmark/dataset/API contracts:
 
 - `docs/v1.0-hybrid-quantum-ai-benchmark.md`
 - `docs/v1.0-hybrid-quantum-ai-integration-guide.md`
 
-Planned benchmark scripts:
+Benchmark scripts:
 
 - `bench/hybrid_quantum_ai_benchmark.exs`
 - `bench/hybrid_quantum_ai_baseline.exs`
@@ -126,6 +126,13 @@ TurboQuant rerank lanes (deterministic fixture-first):
 ```bash
 mise exec -- mix run bench/hybrid_quantum_ai_benchmark.exs rerank_quality_delta_turboquant
 mise exec -- mix run bench/turboquant_rerank_benchmark.exs
+```
+
+Bring-your-own dataset lanes:
+
+```bash
+mise exec -- mix run bench/hybrid_quantum_ai_benchmark.exs rerank_quality_delta_turboquant --dataset-path bench/datasets/rerank/rq_small_v1.csv --query-id q-1 --dataset-id rq_small_v1
+mise exec -- mix run bench/turboquant_rerank_benchmark.exs --dataset-path bench/datasets/rerank/rq_medium_v1.csv --query-id q-42 --bit-width 4
 ```
 
 ## Phase 18 High-Value Performance Matrix

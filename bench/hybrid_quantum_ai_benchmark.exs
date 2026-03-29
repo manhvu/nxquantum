@@ -1,7 +1,37 @@
 alias NxQuantum.AI
 
-scenario = List.first(System.argv()) || "rerank_quality_delta"
-seed = 20260324
+{scenario, cli} =
+  case System.argv() do
+    [scenario | rest] ->
+      if String.starts_with?(scenario, "--"), do: {"rerank_quality_delta", [scenario | rest]}, else: {scenario, rest}
+
+    args -> {"rerank_quality_delta", args}
+  end
+
+parse_args = fn parse_args, args, acc ->
+  case args do
+    [] ->
+    acc
+
+    ["--seed", value | rest] ->
+      parse_args.(parse_args, rest, Map.put(acc, :seed, String.to_integer(value)))
+
+    ["--dataset-path", value | rest] ->
+      parse_args.(parse_args, rest, Map.put(acc, :dataset_path, value))
+
+    ["--dataset-id", value | rest] ->
+      parse_args.(parse_args, rest, Map.put(acc, :dataset_id, value))
+
+    ["--query-id", value | rest] ->
+      parse_args.(parse_args, rest, Map.put(acc, :query_id, value))
+
+    [_unknown | rest] ->
+      parse_args.(parse_args, rest, acc)
+  end
+end
+
+cli_opts = parse_args.(parse_args, cli, %{})
+seed = Map.get(cli_opts, :seed, 20260324)
 
 run = fn
   "rerank_quality_delta" ->
@@ -18,6 +48,7 @@ run = fn
 
     %{
       scenario_id: "rerank_quality_delta",
+      dataset_id: Map.get(cli_opts, :dataset_id, "rq_small_v1"),
       seed: seed,
       baseline_metrics: %{ndcg_at_10: 0.72},
       hybrid_metrics: %{ndcg_at_10: 0.78},
@@ -42,12 +73,21 @@ run = fn
       request_id: "req-rerank-turbo-1",
       correlation_id: "corr-rerank-turbo-1",
       tool_name: "quantum_kernel_rerank.v1",
-      input: %{
-        candidate_ids: candidate_ids,
-        query_embedding: query_embedding,
-        candidate_embeddings: candidate_embeddings,
-        quantization: %{codec: :turboquant, mode: :prod_unbiased, bit_width: 4, seed: seed}
-      },
+      input:
+        if is_binary(Map.get(cli_opts, :dataset_path)) do
+          %{
+            dataset_path: Map.fetch!(cli_opts, :dataset_path),
+            query_id: Map.get(cli_opts, :query_id, "q-1"),
+            quantization: %{codec: :turboquant, mode: :prod_unbiased, bit_width: 4, seed: seed}
+          }
+        else
+          %{
+            candidate_ids: candidate_ids,
+            query_embedding: query_embedding,
+            candidate_embeddings: candidate_embeddings,
+            quantization: %{codec: :turboquant, mode: :prod_unbiased, bit_width: 4, seed: seed}
+          }
+        end,
       execution_policy: %{fallback_policy: :strict}
     }
 
@@ -57,6 +97,7 @@ run = fn
 
     %{
       scenario_id: "rerank_quality_delta_turboquant",
+      dataset_id: Map.get(cli_opts, :dataset_id, "rq_small_v1"),
       seed: seed,
       baseline_metrics: %{ndcg_at_10: 0.72, memory_bytes_per_vector: 512},
       hybrid_metrics: %{ndcg_at_10: 0.75, memory_bytes_per_vector: 64, latency_p95_ms: latency_ms},
@@ -79,6 +120,7 @@ run = fn
 
     %{
       scenario_id: "constrained_optimization_assistant",
+      dataset_id: Map.get(cli_opts, :dataset_id, "co_knapsack_v1"),
       seed: seed,
       baseline_metrics: %{objective_gap_to_known_best: 0.18},
       hybrid_metrics: %{objective_gap_to_known_best: 0.09},
@@ -90,6 +132,7 @@ run = fn
   _ ->
     %{
       scenario_id: "latency_fallback_impact",
+      dataset_id: Map.get(cli_opts, :dataset_id, "lf_mixed_v1"),
       seed: seed,
       baseline_metrics: %{latency_p95_ms: 78.0},
       hybrid_metrics: %{latency_p95_ms: 82.0},

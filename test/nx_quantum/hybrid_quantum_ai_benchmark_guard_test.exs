@@ -19,6 +19,8 @@ defmodule NxQuantum.HybridQuantumAIBenchmarkGuardTest do
     assert content =~ "rerank_quality_delta_turboquant"
     assert content =~ "constrained_optimization_assistant"
     assert content =~ "latency_fallback_impact"
+    assert content =~ "dataset_id"
+    assert content =~ "--dataset-path"
   end
 
   test "hybrid benchmark report contract includes baseline and caveat fields" do
@@ -28,5 +30,17 @@ defmodule NxQuantum.HybridQuantumAIBenchmarkGuardTest do
     assert content =~ "fallback_rate"
     assert content =~ "caveats"
     assert content =~ "memory_bytes_per_vector"
+  end
+
+  test "rerank dataset files are present for benchmark and user dataset onboarding" do
+    rerank_dir = Path.join(@bench_dir, "datasets/rerank")
+    assert File.exists?(Path.join(rerank_dir, "rq_small_v1.csv"))
+    assert File.exists?(Path.join(rerank_dir, "rq_medium_v1.csv"))
+    assert File.exists?(Path.join(rerank_dir, "rq_small_v1.manifest.json"))
+    assert File.exists?(Path.join(rerank_dir, "rq_medium_v1.manifest.json"))
+
+    small_manifest = File.read!(Path.join(rerank_dir, "rq_small_v1.manifest.json"))
+    assert small_manifest =~ "\"dataset_id\": \"rq_small_v1\""
+    assert small_manifest =~ "\"sha256\""
   end
 end

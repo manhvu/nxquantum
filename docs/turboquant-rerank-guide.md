@@ -45,6 +45,37 @@ request = %{
 {:ok, result} = NxQuantum.AI.run_tool(request)
 ```
 
+## Bring Your Own Dataset (CSV)
+
+You can supply a local CSV dataset instead of in-memory embedding maps.
+
+Required columns:
+
+1. `query_id`
+2. `candidate_id`
+3. `query_embedding` (pipe-delimited float list, e.g. `0.1|0.2|0.3`)
+4. `candidate_embedding` (pipe-delimited float list)
+
+Optional columns are ignored (for example `label`, `classical_score`).
+
+```elixir
+request = %{
+  schema_version: "v1",
+  request_id: "req-dataset-1",
+  correlation_id: "corr-dataset-1",
+  tool_name: "quantum_kernel_rerank.v1",
+  input: %{
+    dataset_path: "bench/datasets/rerank/rq_small_v1.csv",
+    query_id: "q-1",
+    candidate_ids: ["d-2", "d-1", "d-3"],
+    quantization: %{codec: :turboquant, mode: :prod_unbiased, bit_width: 4, seed: 20260329}
+  },
+  execution_policy: %{fallback_policy: :strict}
+}
+
+{:ok, result} = NxQuantum.AI.run_tool(request)
+```
+
 ## Determinism Rules
 
 1. Fix `seed` for repeated experiments.
@@ -72,3 +103,4 @@ The TurboQuant-specific benchmark output includes:
 2. `memory_bytes_per_vector`
 3. `compression_ratio_vs_fp32`
 4. deterministic top-k lane parity (`scalar` vs `parallel`)
+5. cache and strategy diagnostics in tool metadata (`cache_hit`, `strategy_reason`, `estimated_work`)
