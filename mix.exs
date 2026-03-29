@@ -1,7 +1,7 @@
 defmodule NxQuantum.MixProject do
   use Mix.Project
 
-  @version "0.9.0"
+  @version "0.11.0"
   @source_url "https://github.com/diogenes/nxquantum"
 
   def project do

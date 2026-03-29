@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.11.0] - 2026-03-29
+
+### Added
+
+- Roadmap Phase 22/23 implementation closure under the `0.x` versioning track (`v0.10` + `v0.11` roadmap labels).
+- TurboQuant-inspired deterministic rerank compression path with versioned tool-name compatibility:
+  - `quantum-kernel reranking`
+  - `quantum_kernel_rerank.v1`
+- CSV dataset onboarding for rerank workflows with typed validation (`--dataset-path`, `--query-id`).
+- AI rollout gate KPI checks for TurboQuant production promotion decisions.
+
+### Improved
+
+- Benchmark/evidence coverage for TurboQuant rerank lanes (quality, latency, memory) across hybrid benchmark scripts and guard lanes.
+- User/operator guidance for benchmark integration and rollout playbooks aligned to hybrid quantum-AI contracts.
+
+### References
+
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/v1.0-hybrid-quantum-ai-benchmark.md](docs/v1.0-hybrid-quantum-ai-benchmark.md)
+- [docs/v1.0-hybrid-quantum-ai-integration-guide.md](docs/v1.0-hybrid-quantum-ai-integration-guide.md)
+- [docs/turboquant-rerank-guide.md](docs/turboquant-rerank-guide.md)
+
+## [0.9.1] - 2026-03-29
+
+### Added
+
+- Runtime auto-selection support for estimator paths (`runtime_profile: :auto`) with deterministic lane-selection reasons in result metadata.
+- Hot/cold cache-mode benchmark harness lanes and blocking/non-blocking guard semantics for `batch_obs_8q`.
+
+### Improved
+
+- Compiled fused-kernel cost profile via reusable per-wire compiled scaffolding while preserving numeric parity and eligibility/fallback behavior.
+- Evolved-state cache policy with byte-aware cap + TTL + deterministic oldest-first eviction for repeated state-vector workloads.
+- Estimator strategy observability metadata coverage and CI guard tightening for hot-lane performance protection.
+
+### References
+
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/v0.9-high-value-performance-matrix.md](docs/v0.9-high-value-performance-matrix.md)
+- [docs/v0.9-phase-a-sampled-scalar-plan.md](docs/v0.9-phase-a-sampled-scalar-plan.md)
+- [docs/v0.9-phase-b-fused-kernel-runtime-plan.md](docs/v0.9-phase-b-fused-kernel-runtime-plan.md)
+- [docs/v0.9-phase-c-batch-gap-closure-plan.md](docs/v0.9-phase-c-batch-gap-closure-plan.md)
+
 ## [0.9.0] - 2026-03-25
 
 ### Added
